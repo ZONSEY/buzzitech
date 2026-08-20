@@ -92,10 +92,14 @@ export class InterventionsService {
           locationAddress: true,
         },
       });
-      if (projectRequest?.locationLat != null && projectRequest.locationLng != null) {
+      if (
+        projectRequest?.locationLat != null &&
+        projectRequest.locationLng != null
+      ) {
         locationLat = projectRequest.locationLat;
         locationLng = projectRequest.locationLng;
-        locationAddress = locationAddress ?? projectRequest.locationAddress ?? undefined;
+        locationAddress =
+          locationAddress ?? projectRequest.locationAddress ?? undefined;
       }
     }
 
