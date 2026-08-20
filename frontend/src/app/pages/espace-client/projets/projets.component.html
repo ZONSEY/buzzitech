@@ -1,0 +1,46 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Mes projets</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Vos demandes de devis structurées.</p>
+    </div>
+    <a
+      routerLink="/espace-client/projets/nouveau"
+      class="bg-buzz-red px-5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+    >
+      + NOUVELLE DEMANDE
+    </a>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && projects().length === 0) {
+    <p class="mt-10 text-sm text-buzz-muted">Vous n'avez pas encore fait de demande de projet.</p>
+  }
+
+  @if (state() === 'loaded' && projects().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (p of projects(); track p.id) {
+        <a
+          [routerLink]="['/espace-client/projets', p.id]"
+          class="flex items-center justify-between gap-4 border border-buzz-border bg-buzz-surface p-4 transition-colors hover:border-buzz-red/50"
+        >
+          <div class="min-w-0">
+            <div class="truncate text-sm font-semibold text-buzz-text">{{ p.title }}</div>
+            <div class="mt-0.5 font-mono text-xs tracking-wide text-buzz-muted">
+              {{ p.createdAt | date: 'dd/MM/yyyy' }} · {{ statusLabel(p.status) }}
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</section>

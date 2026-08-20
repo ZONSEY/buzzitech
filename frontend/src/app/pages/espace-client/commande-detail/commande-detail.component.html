@@ -1,0 +1,124 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <a routerLink="/espace-client/commandes" class="mb-6 inline-block font-mono text-xs text-buzz-muted hover:text-buzz-text">
+    <app-icon name="arrow-left" [size]="14" /> MES COMMANDES
+  </a>
+
+  @if (paymentFeedback() === 'success') {
+    <div class="mb-6 border border-buzz-cyan bg-buzz-surface px-4 py-3 font-mono text-xs text-buzz-cyan">
+      <app-icon name="check" [size]="12" /> Paiement confirmé. Merci pour votre commande !
+    </div>
+  }
+  @if (paymentFeedback() === 'cancelled') {
+    <div class="mb-6 border border-buzz-amber bg-buzz-surface px-4 py-3 font-mono text-xs text-buzz-amber">
+      Paiement annulé. Vous pouvez réessayer ci-dessous.
+    </div>
+  }
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'not-found') {
+    <p class="font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> COMMANDE INTROUVABLE</p>
+  }
+
+  @if (state() === 'error') {
+    <p class="font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && order(); as o) {
+    <h1 class="font-heading text-2xl font-bold text-buzz-text">{{ o.reference }}</h1>
+    <p class="mt-1 font-mono text-sm tracking-wide text-buzz-muted">
+      {{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ statusLabel(o.status) }}
+    </p>
+
+    <div class="mt-6 border border-buzz-border bg-buzz-surface p-6">
+      <h2 class="font-heading text-sm font-semibold text-buzz-text">Articles</h2>
+      <div class="mt-4 flex flex-col gap-3">
+        @for (item of o.items; track item.id) {
+          <div class="flex items-center justify-between border-b border-buzz-border pb-3 text-sm">
+            <span class="text-buzz-text">{{ itemName(item) }} × {{ item.quantity }}</span>
+            <span class="text-buzz-muted">{{ +item.unitPrice * item.quantity | number: '1.0-0' }} FCFA</span>
+          </div>
+        }
+      </div>
+
+      <div class="mt-4 flex flex-col gap-1.5 text-sm">
+        <div class="flex justify-between text-buzz-muted">
+          <span>Sous-total</span>
+          <span>{{ +o.subtotal | number: '1.0-0' }} FCFA</span>
+        </div>
+        @if (+o.shippingCost > 0) {
+          <div class="flex justify-between text-buzz-muted">
+            <span>Livraison</span>
+            <span>{{ +o.shippingCost | number: '1.0-0' }} FCFA</span>
+          </div>
+        }
+        @if (+o.discount > 0) {
+          <div class="flex justify-between text-buzz-muted">
+            <span>Remise</span>
+            <span>-{{ +o.discount | number: '1.0-0' }} FCFA</span>
+          </div>
+        }
+        <div class="mt-2 flex justify-between font-heading text-lg font-bold text-buzz-text">
+          <span>TOTAL</span>
+          <span class="text-buzz-red">{{ +o.totalAmount | number: '1.0-0' }} FCFA</span>
+        </div>
+      </div>
+    </div>
+
+    @if (o.address) {
+      <div class="mt-4 border border-buzz-border bg-buzz-surface p-6">
+        <h2 class="font-heading text-sm font-semibold text-buzz-text">Livraison</h2>
+        <p class="mt-2 text-sm text-buzz-muted">
+          {{ o.address.recipient }}<br />
+          {{ o.address.address }}, {{ o.address.city }}, {{ o.address.country }}<br />
+          {{ o.address.phone }}
+        </p>
+      </div>
+    }
+
+    @if (cancelError()) {
+      <p class="mt-4 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ cancelError() }}</p>
+    }
+
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button
+        type="button"
+        [disabled]="downloadingInvoice()"
+        (click)="downloadInvoice()"
+        class="inline-flex items-center gap-2 border border-buzz-border px-7 py-3.5 text-sm font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+      >
+        <app-icon name="download" [size]="14" />
+        {{ downloadingInvoice() ? 'GÉNÉRATION...' : 'TÉLÉCHARGER LA FACTURE' }}
+      </button>
+
+      @if (o.status === 'PENDING') {
+        <button
+          type="button"
+          (click)="pay()"
+          class="bg-buzz-red px-7 py-3.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+        >
+          PAYER MAINTENANT <app-icon name="arrow-right" [size]="14" />
+        </button>
+      }
+
+      @if (o.status === 'PENDING' || o.status === 'CONFIRMED') {
+        <button
+          type="button"
+          [disabled]="cancelling()"
+          (click)="cancel()"
+          class="border border-buzz-border px-7 py-3.5 text-sm font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+        >
+          @if (cancelling()) {
+            ANNULATION...
+          } @else {
+            ANNULER LA COMMANDE
+          }
+        </button>
+      }
+    </div>
+  }
+</section>

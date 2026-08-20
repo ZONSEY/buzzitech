@@ -1,0 +1,102 @@
+<section class="mx-auto max-w-6xl px-6 py-10">
+  <div>
+    <h1 class="font-heading text-2xl font-bold text-buzz-text">Commandes</h1>
+    <p class="mt-1 text-sm text-buzz-muted">Suivez et mettez à jour le statut des commandes.</p>
+  </div>
+
+  <form [formGroup]="filters" class="mt-8 flex flex-wrap gap-3">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Référence ou email client..."
+      class="min-w-[240px] flex-1 border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+    />
+
+    <select
+      formControlName="status"
+      class="border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+    >
+      <option value="">Tous les statuts</option>
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ statusLabel(s) }}</option>
+      }
+    </select>
+  </form>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && orders().length === 0) {
+    <p class="mt-10 text-sm text-buzz-muted">Aucune commande ne correspond à cette recherche.</p>
+  }
+
+  @if (state() === 'loaded' && orders().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (o of orders(); track o.id) {
+        <div class="flex flex-wrap items-center gap-4 border border-buzz-border bg-buzz-surface p-4">
+          <div class="min-w-[140px]">
+            <span class="block font-mono text-xs text-buzz-cyan">{{ o.reference }}</span>
+            <span class="block text-xs text-buzz-muted">
+              {{ o.createdAt | date: 'dd/MM/yyyy' }}
+            </span>
+          </div>
+
+          <div class="min-w-[180px] flex-1">
+            <span class="block truncate text-sm text-buzz-text">{{ clientName(o) }}</span>
+            @if (o.user) {
+              <span class="block truncate text-xs text-buzz-muted">{{ o.user.email }}</span>
+            }
+          </div>
+
+          <span class="font-heading text-sm font-bold text-buzz-red">
+            {{ +o.totalAmount | number: '1.0-0' }} FCFA
+          </span>
+
+          <select
+            [value]="o.status"
+            [disabled]="updatingId() === o.id"
+            (change)="changeStatus(o, $any($event.target).value)"
+            class="border border-buzz-border bg-buzz-bg px-3 py-2 text-xs text-buzz-text outline-none focus:border-buzz-red disabled:opacity-60"
+          >
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ statusLabel(s) }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    @if (meta(); as m) {
+      @if (m.totalPages > 1) {
+        <div class="mt-8 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            [disabled]="m.page <= 1"
+            (click)="goToPage(m.page - 1)"
+            class="border border-buzz-border px-4 py-2 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+          >
+            <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+          </button>
+          <span class="font-mono text-sm tracking-wide text-buzz-muted">
+            PAGE {{ m.page }} / {{ m.totalPages }}
+          </span>
+          <button
+            type="button"
+            [disabled]="m.page >= m.totalPages"
+            (click)="goToPage(m.page + 1)"
+            class="border border-buzz-border px-4 py-2 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+          >
+            SUIVANT <app-icon name="arrow-right" [size]="14" />
+          </button>
+        </div>
+      }
+    }
+  }
+</section>

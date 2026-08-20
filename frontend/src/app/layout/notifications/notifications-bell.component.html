@@ -1,0 +1,49 @@
+<div class="relative">
+  <button
+    type="button"
+    (click)="toggle()"
+    class="relative flex h-10 w-10 items-center justify-center text-buzz-text"
+    aria-label="Notifications"
+  >
+    <app-icon name="bell" [size]="20" />
+    @if (unreadCount() > 0) {
+      <span class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-buzz-red px-1 font-mono text-[10px] font-semibold text-white">
+        {{ unreadCount() }}
+      </span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="absolute right-0 top-12 z-50 w-80 border border-buzz-border bg-buzz-surface shadow-lg">
+      <div class="flex items-center justify-between border-b border-buzz-border px-4 py-3">
+        <span class="font-mono text-sm tracking-wide text-buzz-text">NOTIFICATIONS</span>
+        <button type="button" (click)="markAllRead()" class="font-mono text-xs text-buzz-cyan hover:underline">
+          TOUT MARQUER LU
+        </button>
+      </div>
+
+      <div class="max-h-96 overflow-y-auto">
+        @if (items().length === 0) {
+          <p class="px-4 py-6 text-center text-xs text-buzz-muted">Aucune notification.</p>
+        }
+        @for (n of items(); track n.id) {
+          <button
+            type="button"
+            (click)="markRead(n)"
+            class="flex w-full flex-col items-start gap-1 border-b border-buzz-border px-4 py-3 text-left transition-colors hover:bg-buzz-surface-2"
+            [class.opacity-60]="n.isRead"
+          >
+            <span class="flex items-center gap-2 text-xs font-semibold text-buzz-text">
+              @if (!n.isRead) {
+                <span class="h-1.5 w-1.5 rounded-full bg-buzz-red"></span>
+              }
+              {{ n.title }}
+            </span>
+            <span class="text-xs text-buzz-muted">{{ n.message }}</span>
+            <span class="font-mono text-xs text-buzz-muted">{{ n.createdAt | date: 'dd/MM HH:mm' }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

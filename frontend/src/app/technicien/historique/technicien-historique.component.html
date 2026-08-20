@@ -1,0 +1,90 @@
+<section class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+  <div class="mb-6">
+    <span class="font-mono text-sm tracking-wide text-buzz-cyan">TECHNICIEN</span>
+    <h1 class="mt-2 font-heading text-2xl font-bold text-buzz-text">Historique des missions</h1>
+    <p class="mt-1 text-sm text-buzz-muted">Vos interventions terminées.</p>
+  </div>
+
+  <div [formGroup]="filters" class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Rechercher (référence, titre, client)..."
+      class="border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none sm:col-span-1"
+    />
+    <div>
+      <label class="mb-1 block font-mono text-xs tracking-wide text-buzz-muted">DU</label>
+      <input
+        type="date"
+        formControlName="from"
+        class="w-full border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+      />
+    </div>
+    <div>
+      <label class="mb-1 block font-mono text-xs tracking-wide text-buzz-muted">AU</label>
+      <input
+        type="date"
+        formControlName="to"
+        class="w-full border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+      />
+    </div>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && missions().length === 0) {
+    <div class="border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">AUCUNE MISSION TERMINÉE</span>
+      <p class="mt-2 text-sm text-buzz-muted">Aucune intervention ne correspond à ces critères.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && missions().length > 0) {
+    <div class="flex flex-col gap-3">
+      @for (m of missions(); track m.id) {
+        <a
+          [routerLink]="['/technicien/missions', m.id]"
+          class="flex flex-col gap-2 border border-buzz-border bg-buzz-surface p-4 transition-colors hover:border-buzz-red/50 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="truncate text-sm font-semibold text-buzz-text">{{ m.title }}</span>
+              <span class="font-mono text-xs tracking-wide text-buzz-muted">{{ m.reference }}</span>
+            </div>
+            <div class="mt-1 text-xs text-buzz-muted">
+              {{ m.client.prenom }} {{ m.client.nom }}
+              @if (m.actualDuration) {
+                · {{ m.actualDuration }} min
+              }
+            </div>
+          </div>
+          <div class="shrink-0 font-mono text-sm tracking-wide text-buzz-cyan">
+            {{ m.completedAt ? (m.completedAt | date: 'dd/MM/yyyy') : (m.scheduledAt | date: 'dd/MM/yyyy') }}
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (meta() && meta()!.totalPages > 1) {
+      <div class="mt-8 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="12" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ page() }} / {{ meta()!.totalPages }}</span>
+        <button type="button" [disabled]="page() >= meta()!.totalPages" (click)="goToPage(page() + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="12" />
+        </button>
+      </div>
+    }
+  }
+</section>

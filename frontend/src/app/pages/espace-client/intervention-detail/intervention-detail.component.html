@@ -1,0 +1,185 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <a routerLink="/espace-client/interventions" class="font-mono text-sm tracking-wide text-buzz-muted hover:text-buzz-text">
+    <app-icon name="arrow-left" [size]="14" /> RETOUR À MES INTERVENTIONS
+  </a>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> INTERVENTION INTROUVABLE</p>
+  }
+
+  @if (state() === 'loaded' && intervention(); as i) {
+    <div class="mt-6 mb-4 flex items-start justify-between gap-4">
+      <div>
+        <span class="font-mono text-sm tracking-wide text-buzz-cyan">{{ i.reference }}</span>
+        <h1 class="mt-1 font-heading text-2xl font-bold text-buzz-text">{{ i.title }}</h1>
+      </div>
+      <span class="shrink-0 border border-buzz-border px-3 py-1.5 font-mono text-sm tracking-wide text-buzz-text">
+        {{ statusLabels[i.status] }}
+      </span>
+    </div>
+
+    <div class="border border-buzz-border bg-buzz-surface p-5">
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <dt class="font-mono text-sm tracking-wide text-buzz-muted">DATE PLANIFIÉE</dt>
+          <dd class="mt-1 text-sm text-buzz-text">{{ i.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        </div>
+        @if (i.technician) {
+          <div>
+            <dt class="font-mono text-sm tracking-wide text-buzz-muted">TECHNICIEN</dt>
+            <dd class="mt-1 text-sm text-buzz-text">{{ i.technician.prenom }} {{ i.technician.nom }}</dd>
+          </div>
+        }
+        <div class="sm:col-span-2">
+          <dt class="font-mono text-sm tracking-wide text-buzz-muted">ADRESSE</dt>
+          @if (i.address) {
+            <dd class="mt-1 text-sm text-buzz-text">{{ i.address.address }}, {{ i.address.city }}</dd>
+          } @else if (i.addressText) {
+            <dd class="mt-1 text-sm text-buzz-text">{{ i.addressText }}</dd>
+          }
+        </div>
+        @if (i.description) {
+          <div class="sm:col-span-2">
+            <dt class="font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</dt>
+            <dd class="mt-1 text-sm text-buzz-text">{{ i.description }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    @if (i.status === 'ACCEPTED') {
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+        <span class="font-mono text-sm tracking-wide text-buzz-cyan">MISSION ACCEPTÉE</span>
+        <p class="mt-2 text-sm text-buzz-text">Le technicien a accepté votre demande et se prépare à intervenir.</p>
+      </div>
+    }
+
+    @if (i.status === 'ON_THE_WAY') {
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+        <span class="font-mono text-sm tracking-wide text-buzz-cyan">EN ROUTE</span>
+        <p class="mt-2 text-sm text-buzz-text">Le technicien est en déplacement vers votre adresse.</p>
+      </div>
+    }
+
+    @if (i.status === 'IN_PROGRESS' && i.startedAt) {
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+        <span class="font-mono text-sm tracking-wide text-buzz-cyan">EN COURS</span>
+        <p class="mt-2 text-sm text-buzz-text">
+          Le technicien est intervenu depuis le {{ i.startedAt | date: 'dd/MM/yyyy HH:mm' }}.
+        </p>
+      </div>
+    }
+
+    @if (i.status === 'COMPLETED') {
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-mono text-sm tracking-wide text-buzz-cyan">Compte rendu</h2>
+          <button
+            type="button"
+            [disabled]="downloadingReport()"
+            (click)="downloadReport()"
+            class="inline-flex items-center gap-1.5 font-mono text-xs tracking-wide text-buzz-cyan hover:underline disabled:opacity-50"
+          >
+            <app-icon name="download" [size]="11" />
+            {{ downloadingReport() ? 'GÉNÉRATION...' : 'TÉLÉCHARGER LE RAPPORT' }}
+          </button>
+        </div>
+        <p class="mt-2 text-sm text-buzz-text">{{ i.report }}</p>
+        @if (i.completedAt) {
+          <p class="mt-2 font-mono text-xs text-buzz-muted">TERMINÉE LE {{ i.completedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        }
+      </div>
+
+      @if (i.photos.length > 0) {
+        <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+          <h2 class="font-mono text-sm tracking-wide text-buzz-cyan">Photos</h2>
+          <div class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+            @for (photo of i.photos; track photo.id) {
+              <div class="aspect-square overflow-hidden border border-buzz-border">
+                <img [src]="photo.url" alt="Photo intervention" class="h-full w-full object-cover" />
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (i.materials.length > 0) {
+        <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+          <h2 class="font-mono text-sm tracking-wide text-buzz-cyan">Matériel utilisé</h2>
+          <ul class="mt-3 flex flex-col gap-1.5">
+            @for (mat of i.materials; track mat.id) {
+              <li class="text-sm text-buzz-text">{{ mat.name }} <span class="text-buzz-muted">× {{ mat.quantity }}</span></li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5">
+        <h2 class="font-mono text-sm tracking-wide text-buzz-cyan">Satisfaction</h2>
+
+        @if (i.clientRating) {
+          <div class="mt-3 flex items-center gap-1">
+            @for (s of stars; track s) {
+              <app-icon
+                name="star"
+                [size]="20"
+                [filled]="s <= i.clientRating"
+                class="text-buzz-amber"
+              />
+            }
+          </div>
+          @if (i.clientRatingComment) {
+            <p class="mt-2 text-sm text-buzz-muted">{{ i.clientRatingComment }}</p>
+          }
+        } @else {
+          <p class="mt-1 text-sm text-buzz-muted">Comment s'est passée l'intervention du technicien ?</p>
+          <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="mt-3 flex flex-col gap-3">
+            <div class="flex items-center gap-1">
+              @for (s of stars; track s) {
+                <button
+                  type="button"
+                  (click)="setRating(s)"
+                  (mouseenter)="hoveredStar.set(s)"
+                  (mouseleave)="hoveredStar.set(0)"
+                  [attr.aria-label]="'Noter ' + s + ' étoiles'"
+                  class="text-buzz-amber"
+                >
+                  <app-icon
+                    name="star"
+                    [size]="24"
+                    [filled]="s <= (hoveredStar() || (ratingForm.value.rating ?? 0))"
+                  />
+                </button>
+              }
+            </div>
+            <textarea
+              formControlName="comment"
+              rows="3"
+              placeholder="Un commentaire (optionnel)..."
+              class="w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+            ></textarea>
+            <button
+              type="submit"
+              [disabled]="submittingRating() || !ratingForm.value.rating"
+              class="self-start bg-buzz-red px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              {{ submittingRating() ? 'ENVOI...' : 'ENVOYER MA NOTE' }}
+            </button>
+          </form>
+        }
+      </div>
+    }
+
+    @if (i.status === 'CANCELLED') {
+      <div class="mt-6 border border-buzz-border bg-buzz-surface p-5 text-center">
+        <span class="font-mono text-sm tracking-wide text-buzz-red">INTERVENTION ANNULÉE</span>
+      </div>
+    }
+  }
+</section>

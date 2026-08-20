@@ -1,0 +1,258 @@
+<section class="mx-auto max-w-5xl px-6 py-10">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Produits</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Gérez le catalogue de la boutique.</p>
+    </div>
+    @if (!formOpen()) {
+      <button
+        type="button"
+        (click)="openCreateForm()"
+        class="bg-buzz-red px-5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+      >
+        + NOUVEAU PRODUIT
+      </button>
+    }
+  </div>
+
+  @if (formOpen()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="mt-8 border border-buzz-border bg-buzz-surface p-6"
+    >
+      <h2 class="font-heading text-sm font-semibold text-buzz-text">
+        {{ editingId() ? 'MODIFIER LE PRODUIT' : 'NOUVEAU PRODUIT' }}
+      </h2>
+
+      <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">NOM</label>
+          <input
+            type="text"
+            formControlName="name"
+            (input)="onNameChange($any($event.target).value)"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.name.invalid && f.name.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Le nom est requis.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">SLUG</label>
+          <input
+            type="text"
+            formControlName="slug"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</label>
+          <textarea
+            rows="4"
+            formControlName="description"
+            class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          ></textarea>
+          @if (f.description.invalid && f.description.touched) {
+            <p class="mt-1 text-xs text-buzz-red">La description est requise.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">SKU (optionnel)</label>
+          <input
+            type="text"
+            formControlName="sku"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">GARANTIE EN MOIS (optionnel)</label>
+          <input
+            type="number"
+            formControlName="warranty"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">PRIX (FCFA)</label>
+          <input
+            type="number"
+            formControlName="price"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.price.invalid && f.price.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Prix invalide.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">STOCK</label>
+          <input
+            type="number"
+            formControlName="stock"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.stock.invalid && f.stock.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Stock invalide.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">CATÉGORIE</label>
+          <select
+            formControlName="categoryId"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          >
+            <option value="">Choisir...</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+          @if (f.categoryId.invalid && f.categoryId.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Catégorie requise.</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">MARQUE</label>
+          <select
+            formControlName="brandId"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          >
+            <option value="">Choisir...</option>
+            @for (brand of brands(); track brand.id) {
+              <option [value]="brand.id">{{ brand.name }}</option>
+            }
+          </select>
+          @if (f.brandId.invalid && f.brandId.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Marque requise.</p>
+          }
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="featured" type="checkbox" formControlName="featured" class="h-4 w-4" />
+          <label for="featured" class="font-mono text-sm tracking-wide text-buzz-muted">MIS EN AVANT</label>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="isActive" type="checkbox" formControlName="isActive" class="h-4 w-4" />
+          <label for="isActive" class="font-mono text-sm tracking-wide text-buzz-muted">PUBLIÉ</label>
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="mt-4 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ errorMessage() }}</p>
+      }
+
+      <div class="mt-6 flex gap-3">
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+        >
+          @if (submitting()) {
+            ENREGISTREMENT...
+          } @else {
+            ENREGISTRER
+          }
+        </button>
+        <button
+          type="button"
+          (click)="cancelForm()"
+          class="border border-buzz-border px-6 py-2.5 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2"
+        >
+          ANNULER
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && products().length === 0 && !formOpen()) {
+    <p class="mt-10 text-sm text-buzz-muted">Aucun produit pour le moment.</p>
+  }
+
+  @if (state() === 'loaded' && products().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (p of products(); track p.id) {
+        <div class="flex items-center gap-4 border border-buzz-border bg-buzz-surface p-4">
+          <div class="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden bg-buzz-surface-2">
+            @if (coverImage(p)) {
+              <img [src]="coverImage(p)" [alt]="p.name" class="h-full w-full object-cover" />
+              <button
+                type="button"
+                (click)="removeImage(p)"
+                [disabled]="uploadingFor() === p.id"
+                aria-label="Supprimer l'image"
+                class="absolute right-0 top-0 flex h-4 w-4 items-center justify-center bg-buzz-red text-[10px] text-white disabled:opacity-60"
+              >
+                <app-icon name="x" [size]="10" />
+              </button>
+            } @else {
+              <span class="text-xs text-buzz-muted">Pas d'image</span>
+            }
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="truncate text-sm font-semibold text-buzz-text">{{ p.name }}</span>
+              @if (!p.isActive) {
+                <span class="font-mono text-xs text-buzz-red">MASQUÉ</span>
+              }
+              @if (p.stock === 0) {
+                <span class="font-mono text-xs text-buzz-amber">ÉPUISÉ</span>
+              }
+            </div>
+            <div class="mt-0.5 text-xs text-buzz-muted">
+              {{ p.category.name }} · {{ p.brand.name }} · {{ +p.price | number: '1.0-0' }} FCFA · stock {{ p.stock }}
+            </div>
+          </div>
+
+          <label class="cursor-pointer font-mono text-xs tracking-wide text-buzz-cyan hover:underline">
+            @if (uploadingFor() === p.id) {
+              ENVOI...
+            } @else {
+              + IMAGE
+            }
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              class="hidden"
+              [disabled]="uploadingFor() === p.id"
+              (change)="onFileSelected($event, p)"
+            />
+          </label>
+
+          <button
+            type="button"
+            (click)="openEditForm(p)"
+            class="font-mono text-xs tracking-wide text-buzz-text hover:underline"
+          >
+            MODIFIER
+          </button>
+          <button
+            type="button"
+            (click)="remove(p)"
+            class="font-mono text-xs tracking-wide text-buzz-red hover:underline"
+          >
+            SUPPRIMER
+          </button>
+        </div>
+      }
+    </div>
+  }
+</section>

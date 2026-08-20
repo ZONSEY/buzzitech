@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    // Garde le cache incrémental DANS dist/ : nest-cli's deleteOutDir
+    // (voir nest-cli.json) supprime dist/ avant chaque build, mais ne
+    // sait rien du fichier .tsbuildinfo par défaut placé à côté de ce
+    // tsconfig. Sans ça, tsc croit — à tort — que les fichiers de
+    // sortie déjà supprimés sont toujours à jour, et dist/main.js
+    // n'est jamais régénéré (build "réussi" sans rien produire).
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "prisma.config.ts"]
+}

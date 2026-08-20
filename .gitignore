@@ -1,0 +1,23 @@
+# Environment variables (secrets: DB, JWT, SMTP, Cloudinary, Stripe...)
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# Docker volumes / local data
+postgres_data/
+redis_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/

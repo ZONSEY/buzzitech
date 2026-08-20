@@ -1,0 +1,108 @@
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  <div class="mb-4 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+      NOS OFFRES
+    </span>
+  </div>
+
+  <h1 class="font-heading text-3xl font-bold text-buzz-text sm:text-4xl">
+    Nos niveaux <span class="text-buzz-red">d'engagement</span>
+  </h1>
+  <p class="mt-4 max-w-xl text-sm leading-relaxed text-buzz-muted">
+    Chaque catégorie regroupe un ensemble de services adaptés à vos besoins,
+    du dépannage ponctuel à la supervision continue.
+  </p>
+
+  @if (state() === 'loading') {
+    <div class="mt-16 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT DES OFFRES...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="mt-16 flex flex-col items-center gap-2 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</span>
+      <p class="text-sm text-buzz-muted">Impossible de contacter le serveur. Réessayez plus tard.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && groups().length === 0) {
+    <div class="viewfinder mx-auto mt-16 max-w-md border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="vf-tr"></span>
+      <span class="vf-bl"></span>
+      <span class="font-mono text-sm tracking-wide text-buzz-red">● AUCUN SIGNAL</span>
+      <h2 class="mt-3 font-heading text-lg font-semibold text-buzz-text">Aucune offre publiée pour le moment</h2>
+      <p class="mt-2 text-sm text-buzz-muted">
+        Nos équipes préparent le catalogue. Parlez-nous de votre besoin en attendant.
+      </p>
+      <a
+        routerLink="/contact"
+        class="mt-6 inline-block bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+      >
+        DEMANDER UN DEVIS
+      </a>
+    </div>
+  }
+
+  @if (state() === 'loaded' && groups().length > 0) {
+    <div class="mt-12 flex flex-col gap-14">
+      @for (group of groups(); track group.category.id) {
+        <div>
+          <div class="flex items-baseline justify-between border-b border-buzz-border pb-3">
+            <h2 class="font-heading text-xl font-semibold text-buzz-text">
+              {{ group.category.name }}
+            </h2>
+            @if (group.category.description) {
+              <span class="hidden text-xs text-buzz-muted sm:inline">{{ group.category.description }}</span>
+            }
+          </div>
+
+          @if (group.services.length === 0) {
+            <p class="mt-6 text-sm text-buzz-muted">Aucun service dans cette catégorie pour l'instant.</p>
+          } @else {
+            <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              @for (service of group.services; track service.id) {
+                <div class="viewfinder flex flex-col border border-buzz-border bg-buzz-surface p-6">
+                  <span class="vf-tr"></span>
+                  <span class="vf-bl"></span>
+
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-heading text-sm font-semibold text-buzz-text">
+                      {{ service.name }}
+                    </h3>
+                    @if (service.status === 'UNAVAILABLE') {
+                      <span class="font-mono text-xs text-buzz-red">INDISPONIBLE</span>
+                    }
+                  </div>
+
+                  <p class="mt-2 flex-1 text-xs leading-relaxed text-buzz-muted">
+                    {{ service.shortDescription ?? service.description }}
+                  </p>
+
+                  <div class="mt-4 flex items-center justify-between border-t border-buzz-border pt-4">
+                    <span class="font-heading text-lg font-bold text-buzz-red">
+                      {{ +service.price | number: '1.0-0' }} FCFA
+                    </span>
+                    @if (service.estimatedDuration) {
+                      <span class="font-mono text-xs text-buzz-muted">
+                        ~{{ service.estimatedDuration }}H
+                      </span>
+                    }
+                  </div>
+
+                  <a
+                    routerLink="/contact"
+                    class="mt-4 border border-buzz-border py-2.5 text-center text-xs font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2"
+                  >
+                    DEMANDER UN DEVIS
+                  </a>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

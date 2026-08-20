@@ -1,0 +1,53 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <h1 class="font-heading text-2xl font-bold text-buzz-text">Mes commandes</h1>
+  <p class="mt-1 text-sm text-buzz-muted">L'historique de vos achats.</p>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && orders().length === 0) {
+    <p class="mt-10 text-sm text-buzz-muted">Vous n'avez pas encore passé de commande.</p>
+  }
+
+  @if (state() === 'loaded' && orders().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (o of orders(); track o.id) {
+        <a
+          [routerLink]="['/espace-client/commandes', o.id]"
+          class="flex items-center justify-between gap-4 border border-buzz-border bg-buzz-surface p-4 transition-colors hover:border-buzz-red/50"
+        >
+          <div>
+            <div class="text-sm font-semibold text-buzz-text">{{ o.reference }}</div>
+            <div class="mt-0.5 font-mono text-xs tracking-wide text-buzz-muted">
+              {{ o.createdAt | date: 'dd/MM/yyyy' }} · {{ statusLabel(o.status) }}
+            </div>
+          </div>
+          <div class="font-heading text-sm font-bold text-buzz-red">
+            {{ +o.totalAmount | number: '1.0-0' }} FCFA
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (meta().totalPages > 1) {
+      <div class="mt-8 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="meta().page <= 1" (click)="goToPage(meta().page - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ meta().page }} / {{ meta().totalPages }}</span>
+        <button type="button" [disabled]="meta().page >= meta().totalPages" (click)="goToPage(meta().page + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="14" />
+        </button>
+      </div>
+    }
+  }
+</section>

@@ -1,0 +1,48 @@
+<div class="flex min-h-screen bg-buzz-bg">
+  <!-- Sidebar -->
+  <aside class="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-buzz-border bg-buzz-surface">
+    <div class="flex items-center gap-2.5 border-b border-buzz-border px-5 py-5">
+      <span class="flex shrink-0 items-center rounded bg-white px-2 py-1">
+        <img src="/logo-buzzitech.png" alt="BUZZITECH" class="h-6 w-auto" />
+      </span>
+      <span class="font-heading text-sm font-semibold text-buzz-muted">ADMIN</span>
+      <app-theme-toggle class="ml-auto" />
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-buzz-surface-2 text-buzz-text"
+          [routerLinkActiveOptions]="{ exact: item.path === '/admin' }"
+          class="flex items-center gap-2.5 rounded px-3 py-2.5 font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+        >
+          <app-icon [name]="item.icon" [size]="15" />
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <div class="shrink-0 border-t border-buzz-border p-3">
+      <a
+        routerLink="/"
+        class="block rounded px-3 py-2.5 font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+      >
+        <app-icon name="arrow-left" [size]="14" /> VOIR LE SITE
+      </a>
+      <button
+        type="button"
+        (click)="logout()"
+        class="flex w-full items-center gap-2.5 rounded px-3 py-2.5 text-left font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+      >
+        <app-icon name="log-out" [size]="15" />
+        SE DÉCONNECTER
+      </button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="min-w-0 flex-1 overflow-x-hidden">
+    <router-outlet />
+  </main>
+</div>

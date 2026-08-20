@@ -1,0 +1,136 @@
+<div class="backdrop"></div>
+
+<!-- HERO -->
+<section class="hero border-b border-buzz-border">
+  <div class="hwrap">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="pulse-dot h-1.5 w-1.5 rounded-full bg-buzz-amber"></span>
+          <span class="font-mono text-xs font-medium tracking-[0.25em] text-buzz-muted">
+            SUPERVISION ACTIVE · 24/7
+          </span>
+        </div>
+
+        <h1 class="hero-title">
+          Sécuriser<br />
+          aujourd'hui,<br />
+          assurer <em>demain.</em>
+        </h1>
+
+        <p class="hero-lede">
+          BUZZITECH ASSISTANCE conçoit des solutions intégrées pour protéger vos
+          personnes, vos biens, vos données et assurer la continuité de vos activités.
+        </p>
+
+        <div class="hero-actions">
+          <a routerLink="/contact" class="hbtn hbtn-primary">
+            Demander votre audit
+            <app-icon name="arrow-right" [size]="15" />
+          </a>
+          <a routerLink="/realisations" class="hbtn hbtn-ghost">Nos réalisations</a>
+        </div>
+
+        <div class="hero-locale">
+          <app-icon name="map-pin" [size]="14" />
+          Basé à Ouagadougou — intervention sur tout le territoire
+        </div>
+      </div>
+
+      <!-- Ops panel -->
+      <div class="ops-panel">
+        <div class="ops-corner-b"></div>
+        <div class="ops-head">
+          <span class="ops-live">
+            <span class="pulse-dot h-1.5 w-1.5 rounded-full bg-buzz-amber"></span>
+            EN DIRECT
+          </span>
+          <span class="ops-tag font-mono">PANEL·04 SÉC. PHYSIQUE</span>
+        </div>
+
+        <div class="radar-stage">
+          <div class="radar-ring radar-ring-1"></div>
+          <div class="radar-ring radar-ring-2"></div>
+          <div class="radar-ring radar-ring-3"></div>
+          <div class="radar-cross"></div>
+          <div class="radar-sweep"></div>
+          <span class="blip" style="top: 28%; left: 62%"></span>
+          <span class="blip blip-red" style="top: 66%; left: 38%"></span>
+          <span class="blip" style="top: 42%; left: 24%"></span>
+          <div class="radar-label">
+            <b>ZONE NORD</b>
+            3 sites sous supervision
+          </div>
+        </div>
+
+        <div class="ops-readout">
+          @for (item of opsReadout; track item.label) {
+            <div>
+              <div class="k">{{ item.label }}</div>
+              <div class="v" [class.up]="item.positive">{{ item.value }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="hstats">
+    <div class="hwrap hstats-grid">
+      @for (stat of stats; track stat.label) {
+        <div class="hstat-cell">
+          <div class="hstat-value">{{ stat.value }}</div>
+          <div class="hstat-label">{{ stat.label }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="hsection hwrap">
+  <div class="hsection-head">
+    <div class="hsection-eyebrow font-mono text-xs font-medium tracking-[0.25em] text-buzz-muted">NOS SYSTÈMES</div>
+    <h2 class="hsection-title">Quatre disciplines, une seule équipe d'intervention</h2>
+    <p class="hsection-lede">Chaque module peut être déployé seul ou combiné selon les risques propres à votre site.</p>
+  </div>
+
+  <div class="hmodules">
+    @for (service of services; track service.title) {
+      <div class="hmodule" [style.--mod-accent]="service.accentVar">
+        <div class="hmodule-top">
+          <div class="hmodule-icon">
+            <app-icon [name]="service.icon" [size]="20" />
+          </div>
+          <div class="hmodule-code">{{ service.code }}</div>
+        </div>
+        <h3 class="hmodule-title">{{ service.title }}</h3>
+        <p class="hmodule-desc">{{ service.description }}</p>
+      </div>
+    }
+  </div>
+
+  <div class="hmodules-more">
+    <a routerLink="/offres" class="hbtn hbtn-ghost">
+      Voir nos 3 niveaux d'engagement
+      <app-icon name="arrow-right" [size]="15" />
+    </a>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="hwrap" style="padding-bottom: clamp(56px, 7vw, 88px);">
+  <div class="hbrief">
+    <div>
+      <h2 class="hbrief-title">Demandez votre audit <em>stratégique</em></h2>
+      <p class="hbrief-copy">Un premier pas concret pour sécuriser votre activité. Réponse garantie sous 24h.</p>
+    </div>
+    <div class="hbrief-side">
+      <a routerLink="/contact" class="hbtn hbtn-primary">
+        Démarrer maintenant
+        <app-icon name="arrow-right" [size]="15" />
+      </a>
+    </div>
+  </div>
+</section>

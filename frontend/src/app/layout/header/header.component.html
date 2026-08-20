@@ -1,0 +1,93 @@
+<header
+  class="sticky top-0 z-50 border-b border-buzz-border bg-buzz-bg/95 backdrop-blur transition-shadow"
+  [class.shadow-lg]="isScrolled()"
+>
+  <div class="mx-auto flex max-w-[1220px] items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8">
+    <!-- Logo -->
+    <a routerLink="/" class="flex shrink-0 items-center" (click)="closeMenu()">
+      <span class="flex items-center rounded bg-white px-2.5 py-1.5">
+        <img src="/logo-buzzitech.png" alt="BUZZITECH ASSISTANCE" class="h-7 w-auto sm:h-8" />
+      </span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden items-center gap-0.5 2xl:flex">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-buzz-surface-2 text-buzz-text"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          class="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-2 text-sm font-medium tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text 2xl:px-3.5"
+        >
+          <app-icon [name]="item.icon" [size]="15" class="shrink-0" />
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <!-- Search + Cart + Notifications + CTA -->
+    <div class="flex shrink-0 items-center gap-2">
+      <app-search-overlay />
+      <app-theme-toggle />
+
+      @if (isAuthenticated()) {
+        <app-notifications-bell />
+      }
+
+      <a routerLink="/panier" class="relative flex h-10 w-10 items-center justify-center text-buzz-text" aria-label="Panier">
+        <app-icon name="shopping-cart" [size]="20" />
+        @if (cart().totalItems > 0) {
+          <span class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-buzz-red px-1 font-mono text-[10px] font-semibold text-white">
+            {{ cart().totalItems }}
+          </span>
+        }
+      </a>
+
+      <a
+        routerLink="/contact"
+        class="hidden items-center gap-1 whitespace-nowrap bg-buzz-red px-3.5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark 2xl:inline-flex 2xl:px-5"
+      >
+        AUDIT GRATUIT <app-icon name="arrow-right" [size]="14" class="shrink-0" />
+      </a>
+    </div>
+
+    <!-- Mobile toggle -->
+    <button
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded border border-buzz-border text-buzz-text 2xl:hidden"
+      (click)="toggleMenu()"
+      aria-label="Ouvrir le menu"
+    >
+      @if (isMenuOpen()) {
+        <app-icon name="x" [size]="18" />
+      } @else {
+        <app-icon name="menu" [size]="18" />
+      }
+    </button>
+  </div>
+
+  <!-- Mobile nav -->
+  @if (isMenuOpen()) {
+    <nav class="flex flex-col gap-1 border-t border-buzz-border bg-buzz-bg px-4 py-4 2xl:hidden">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-buzz-surface-2 text-buzz-text"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          (click)="closeMenu()"
+          class="flex items-center gap-3 rounded px-4 py-3 text-sm font-medium tracking-wide text-buzz-muted hover:bg-buzz-surface-2 hover:text-buzz-text"
+        >
+          <app-icon [name]="item.icon" [size]="16" />
+          {{ item.label }}
+        </a>
+      }
+      <a
+        routerLink="/contact"
+        (click)="closeMenu()"
+        class="mt-2 bg-buzz-red px-5 py-3 text-center text-sm font-semibold tracking-wide text-white"
+      >
+        AUDIT GRATUIT <app-icon name="arrow-right" [size]="14" />
+      </a>
+    </nav>
+  }
+</header>

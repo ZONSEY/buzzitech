@@ -1,0 +1,181 @@
+<section class="p-6 sm:p-8">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Équipements clients</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Historique du matériel installé chez chaque client.</p>
+    </div>
+    <button
+      type="button"
+      (click)="toggleCreateForm()"
+      class="bg-buzz-red px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+    >
+      {{ showCreateForm() ? 'FERMER' : '+ NOUVEL ÉQUIPEMENT' }}
+    </button>
+  </div>
+
+  @if (showCreateForm()) {
+    <form
+      [formGroup]="createForm"
+      (ngSubmit)="createEquipment()"
+      class="mb-8 border border-buzz-border bg-buzz-surface p-5"
+    >
+      @if (createError()) {
+        <p class="mb-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ createError() }}</p>
+      }
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="relative sm:col-span-3">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">CLIENT</label>
+          <input
+            type="text"
+            formControlName="clientSearch"
+            placeholder="Rechercher un client par nom/email..."
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+          @if (clientResults().length > 0) {
+            <div class="absolute z-10 mt-1 w-full border border-buzz-border bg-buzz-surface shadow-lg">
+              @for (c of clientResults(); track c.id) {
+                <button
+                  type="button"
+                  (click)="pickClient(c)"
+                  class="block w-full px-3 py-2 text-left text-sm text-buzz-text hover:bg-buzz-surface-2"
+                >
+                  {{ c.prenom }} {{ c.nom }} <span class="text-buzz-muted">— {{ c.email }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <div class="sm:col-span-3">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">NOM DE L'ÉQUIPEMENT</label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Ex : Caméra dôme 4MP"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">CATÉGORIE</label>
+          <input
+            type="text"
+            formControlName="category"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">MARQUE</label>
+          <input
+            type="text"
+            formControlName="brand"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">N° DE SÉRIE</label>
+          <input
+            type="text"
+            formControlName="serialNumber"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">GARANTIE JUSQU'AU</label>
+          <input
+            type="date"
+            formControlName="warrantyUntil"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+      </div>
+      <button
+        type="submit"
+        [disabled]="creating()"
+        class="mt-4 bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        {{ creating() ? 'CRÉATION...' : "CRÉER L'ÉQUIPEMENT" }}
+      </button>
+    </form>
+  }
+
+  <div [formGroup]="filters" class="mb-4">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Rechercher (nom, marque, client)..."
+      class="w-full max-w-sm border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+    />
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && equipment().length === 0) {
+    <p class="py-10 text-sm text-buzz-muted">Aucun équipement enregistré.</p>
+  }
+
+  @if (state() === 'loaded' && equipment().length > 0) {
+    <div class="overflow-x-auto border border-buzz-border">
+      <table class="w-full min-w-[800px] text-left text-sm">
+        <thead class="border-b border-buzz-border bg-buzz-surface">
+          <tr class="font-mono text-sm tracking-wide text-buzz-muted">
+            <th class="px-4 py-3">ÉQUIPEMENT</th>
+            <th class="px-4 py-3">CLIENT</th>
+            <th class="px-4 py-3">INSTALLÉ LE</th>
+            <th class="px-4 py-3">GARANTIE</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (eq of equipment(); track eq.id) {
+            <tr class="border-b border-buzz-border last:border-0">
+              <td class="px-4 py-3">
+                <div class="text-buzz-text">{{ eq.name }}</div>
+                @if (eq.brand || eq.category) {
+                  <div class="mt-0.5 text-xs text-buzz-muted">{{ eq.brand }} {{ eq.category ? '· ' + eq.category : '' }}</div>
+                }
+              </td>
+              <td class="px-4 py-3 text-buzz-muted">
+                {{ eq.client?.prenom }} {{ eq.client?.nom }}
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-buzz-muted">{{ eq.installedAt | date: 'dd/MM/yyyy' }}</td>
+              <td class="px-4 py-3 font-mono text-xs text-buzz-muted">
+                {{ eq.warrantyUntil ? (eq.warrantyUntil | date: 'dd/MM/yyyy') : '—' }}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  [disabled]="updatingId() === eq.id"
+                  (click)="remove(eq)"
+                  class="font-mono text-xs tracking-wide text-buzz-muted hover:text-buzz-red disabled:opacity-50"
+                >
+                  SUPPRIMER
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (meta() && meta()!.totalPages > 1) {
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="12" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ page() }} / {{ meta()!.totalPages }}</span>
+        <button type="button" [disabled]="page() >= meta()!.totalPages" (click)="goToPage(page() + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="12" />
+        </button>
+      </div>
+    }
+  }
+</section>

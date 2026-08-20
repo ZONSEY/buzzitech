@@ -1,0 +1,85 @@
+<section class="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+  <a routerLink="/espace-client/projets" class="mb-6 inline-block font-mono text-xs text-buzz-muted hover:text-buzz-text">
+    <app-icon name="arrow-left" [size]="14" /> MES PROJETS
+  </a>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'not-found') {
+    <p class="font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> PROJET INTROUVABLE</p>
+  }
+
+  @if (state() === 'error') {
+    <p class="font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && project(); as p) {
+    <div class="mb-4 flex items-center gap-2.5">
+      <span class="h-px w-8 bg-buzz-cyan"></span>
+      <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+        {{ statusLabel(p.status).toUpperCase() }}
+      </span>
+    </div>
+
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="font-heading text-2xl font-bold text-buzz-text sm:text-3xl">{{ p.title }}</h1>
+        <p class="mt-1 font-mono text-sm tracking-wide text-buzz-muted">
+          Envoyée le {{ p.createdAt | date: 'dd/MM/yyyy' }}
+          @if (p.deadline) {
+            · Échéance souhaitée : {{ p.deadline | date: 'dd/MM/yyyy' }}
+          }
+        </p>
+      </div>
+      <button
+        type="button"
+        [disabled]="downloadingPdf()"
+        (click)="downloadPdf()"
+        class="inline-flex shrink-0 items-center gap-2 border border-buzz-border px-4 py-2.5 text-xs font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+      >
+        <app-icon name="download" [size]="14" />
+        {{ downloadingPdf() ? 'GÉNÉRATION...' : 'TÉLÉCHARGER LE DEVIS' }}
+      </button>
+    </div>
+
+    <div class="mt-6 border border-buzz-border bg-buzz-surface p-6">
+      <h2 class="font-heading text-sm font-semibold text-buzz-text">Description</h2>
+      <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-buzz-muted">{{ p.description }}</p>
+
+      @if (p.budget) {
+        <p class="mt-4 font-mono text-xs text-buzz-muted">
+          BUDGET INDIQUÉ : {{ +p.budget | number: '1.0-0' }} FCFA
+        </p>
+      }
+    </div>
+
+    @if (p.estimatedCost || p.estimatedDuration || p.adminComment) {
+      <div class="mt-4 border border-buzz-cyan bg-buzz-surface p-6">
+        <h2 class="font-heading text-sm font-semibold text-buzz-cyan">Estimation Buzzitech</h2>
+
+        <div class="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+          @if (p.estimatedCost) {
+            <div>
+              <span class="block font-mono text-xs text-buzz-muted">COÛT ESTIMÉ</span>
+              <span class="text-buzz-text">{{ +p.estimatedCost | number: '1.0-0' }} FCFA</span>
+            </div>
+          }
+          @if (p.estimatedDuration) {
+            <div>
+              <span class="block font-mono text-xs text-buzz-muted">DURÉE ESTIMÉE</span>
+              <span class="text-buzz-text">{{ p.estimatedDuration }} jours</span>
+            </div>
+          }
+        </div>
+
+        @if (p.adminComment) {
+          <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-buzz-muted">{{ p.adminComment }}</p>
+        }
+      </div>
+    }
+  }
+</section>

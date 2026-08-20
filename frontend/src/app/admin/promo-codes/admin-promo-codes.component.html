@@ -1,0 +1,208 @@
+<section class="p-6 sm:p-8">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Codes promo</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Créez et gérez les codes de réduction pour la boutique.</p>
+    </div>
+    <button
+      type="button"
+      (click)="toggleCreateForm()"
+      class="bg-buzz-red px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+    >
+      {{ showCreateForm() ? 'FERMER' : '+ NOUVEAU CODE' }}
+    </button>
+  </div>
+
+  @if (showCreateForm()) {
+    <form
+      [formGroup]="createForm"
+      (ngSubmit)="createPromoCode()"
+      class="mb-8 border border-buzz-border bg-buzz-surface p-5"
+    >
+      @if (createError()) {
+        <p class="mb-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ createError() }}</p>
+      }
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">CODE</label>
+          <input
+            type="text"
+            formControlName="code"
+            placeholder="BIENVENUE10"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm uppercase text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">TYPE</label>
+          <select
+            formControlName="discountType"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          >
+            <option value="PERCENTAGE">Pourcentage</option>
+            <option value="FIXED">Montant fixe</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">VALEUR</label>
+          <input
+            type="number"
+            min="1"
+            formControlName="discountValue"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">MONTANT MIN. PANIER</label>
+          <input
+            type="number"
+            min="0"
+            formControlName="minOrderAmount"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</label>
+          <input
+            type="text"
+            formControlName="description"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">MAX UTILISATIONS (TOTAL)</label>
+          <input
+            type="number"
+            min="1"
+            formControlName="maxUses"
+            placeholder="Illimité"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">MAX PAR CLIENT</label>
+          <input
+            type="number"
+            min="1"
+            formControlName="maxUsesPerUser"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">EXPIRE LE (OPTIONNEL)</label>
+          <input
+            type="date"
+            formControlName="expiresAt"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+      </div>
+      <button
+        type="submit"
+        [disabled]="creating()"
+        class="mt-4 bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        {{ creating() ? 'CRÉATION...' : 'CRÉER LE CODE' }}
+      </button>
+    </form>
+  }
+
+  <div [formGroup]="filters" class="mb-4">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Rechercher un code..."
+      class="w-full max-w-sm border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+    />
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && promoCodes().length === 0) {
+    <p class="py-10 text-sm text-buzz-muted">Aucun code promo.</p>
+  }
+
+  @if (state() === 'loaded' && promoCodes().length > 0) {
+    <div class="overflow-x-auto border border-buzz-border">
+      <table class="w-full min-w-[800px] text-left text-sm">
+        <thead class="border-b border-buzz-border bg-buzz-surface">
+          <tr class="font-mono text-sm tracking-wide text-buzz-muted">
+            <th class="px-4 py-3">CODE</th>
+            <th class="px-4 py-3">REMISE</th>
+            <th class="px-4 py-3">UTILISATIONS</th>
+            <th class="px-4 py-3">EXPIRE</th>
+            <th class="px-4 py-3">STATUT</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of promoCodes(); track p.id) {
+            <tr class="border-b border-buzz-border last:border-0" [class.opacity-50]="!p.isActive">
+              <td class="px-4 py-3">
+                <div class="font-mono text-xs text-buzz-cyan">{{ p.code }}</div>
+                @if (p.description) {
+                  <div class="mt-0.5 text-xs text-buzz-muted">{{ p.description }}</div>
+                }
+              </td>
+              <td class="px-4 py-3 text-buzz-text">
+                @if (p.discountType === 'PERCENTAGE') {
+                  {{ p.discountValue }}%
+                } @else {
+                  {{ +p.discountValue | number: '1.0-0' }} FCFA
+                }
+              </td>
+              <td class="px-4 py-3 text-buzz-muted">
+                {{ p._count?.orders ?? 0 }}{{ p.maxUses ? ' / ' + p.maxUses : '' }}
+              </td>
+              <td class="px-4 py-3 text-buzz-muted">
+                {{ p.expiresAt ? (p.expiresAt | date: 'dd/MM/yyyy') : '—' }}
+              </td>
+              <td class="px-4 py-3 font-mono text-xs">{{ p.isActive ? 'Actif' : 'Inactif' }}</td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === p.id"
+                    (click)="toggleActive(p)"
+                    class="font-mono text-xs tracking-wide text-buzz-muted hover:text-buzz-text disabled:opacity-50"
+                  >
+                    {{ p.isActive ? 'DÉSACTIVER' : 'ACTIVER' }}
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === p.id"
+                    (click)="remove(p)"
+                    class="font-mono text-xs tracking-wide text-buzz-muted hover:text-buzz-red disabled:opacity-50"
+                  >
+                    SUPPRIMER
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (meta() && meta()!.totalPages > 1) {
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="12" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ page() }} / {{ meta()!.totalPages }}</span>
+        <button type="button" [disabled]="page() >= meta()!.totalPages" (click)="goToPage(page() + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="12" />
+        </button>
+      </div>
+    }
+  }
+</section>

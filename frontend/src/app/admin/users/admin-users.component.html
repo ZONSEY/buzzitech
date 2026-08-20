@@ -1,0 +1,102 @@
+<section class="mx-auto max-w-5xl px-6 py-10">
+  <div>
+    <h1 class="font-heading text-2xl font-bold text-buzz-text">Utilisateurs</h1>
+    <p class="mt-1 text-sm text-buzz-muted">Gérez les comptes et leurs rôles.</p>
+  </div>
+
+  <form [formGroup]="filters" class="mt-8 flex flex-wrap gap-3">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Nom, prénom ou email..."
+      class="min-w-[240px] flex-1 border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+    />
+
+    <select
+      formControlName="role"
+      class="border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+    >
+      <option value="">Tous les rôles</option>
+      @for (r of roles; track r) {
+        <option [value]="r">{{ roleLabel(r) }}</option>
+      }
+    </select>
+  </form>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && users().length === 0) {
+    <p class="mt-10 text-sm text-buzz-muted">Aucun utilisateur ne correspond à cette recherche.</p>
+  }
+
+  @if (state() === 'loaded' && users().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (u of users(); track u.id) {
+        <div class="flex flex-wrap items-center gap-4 border border-buzz-border bg-buzz-surface p-4">
+          <div class="min-w-[200px] flex-1">
+            <span class="block truncate text-sm text-buzz-text">{{ u.prenom }} {{ u.nom }}</span>
+            <span class="block truncate text-xs text-buzz-muted">{{ u.email }}</span>
+          </div>
+
+          <select
+            [value]="u.role"
+            [disabled]="updatingId() === u.id"
+            (change)="changeRole(u, $any($event.target).value)"
+            class="border border-buzz-border bg-buzz-bg px-3 py-2 text-xs text-buzz-text outline-none focus:border-buzz-red disabled:opacity-60"
+          >
+            @for (r of roles; track r) {
+              <option [value]="r">{{ roleLabel(r) }}</option>
+            }
+          </select>
+
+          @if (u.id !== currentUserId) {
+            <button
+              type="button"
+              (click)="remove(u)"
+              [disabled]="updatingId() === u.id"
+              class="font-mono text-xs tracking-wide text-buzz-red hover:underline disabled:opacity-60"
+            >
+              SUPPRIMER
+            </button>
+          } @else {
+            <span class="font-mono text-xs tracking-wide text-buzz-muted">VOUS</span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (meta(); as m) {
+      @if (m.totalPages > 1) {
+        <div class="mt-8 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            [disabled]="m.page <= 1"
+            (click)="goToPage(m.page - 1)"
+            class="border border-buzz-border px-4 py-2 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+          >
+            <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+          </button>
+          <span class="font-mono text-sm tracking-wide text-buzz-muted">
+            PAGE {{ m.page }} / {{ m.totalPages }}
+          </span>
+          <button
+            type="button"
+            [disabled]="m.page >= m.totalPages"
+            (click)="goToPage(m.page + 1)"
+            class="border border-buzz-border px-4 py-2 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+          >
+            SUIVANT <app-icon name="arrow-right" [size]="14" />
+          </button>
+        </div>
+      }
+    }
+  }
+</section>

@@ -1,0 +1,98 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  @if (loading()) {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  } @else if (user(); as u) {
+    <div class="mb-4 flex items-center gap-2.5">
+      <span class="h-px w-8 bg-buzz-cyan"></span>
+      <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+        ESPACE CLIENT
+      </span>
+    </div>
+
+    <h1 class="font-heading text-3xl font-bold text-buzz-text">
+      Bonjour {{ u.prenom }}
+    </h1>
+    <p class="mt-2 text-sm text-buzz-muted">Voici les informations de votre compte.</p>
+
+    <div class="mt-8 border border-buzz-border bg-buzz-surface p-6">
+      <dl class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <dt class="font-mono text-sm tracking-wide text-buzz-muted">NOM COMPLET</dt>
+          <dd class="mt-1 text-sm text-buzz-text">{{ u.prenom }} {{ u.nom }}</dd>
+        </div>
+        <div>
+          <dt class="font-mono text-sm tracking-wide text-buzz-muted">EMAIL</dt>
+          <dd class="mt-1 text-sm text-buzz-text">{{ u.email }}</dd>
+        </div>
+        @if (u.telephone) {
+          <div>
+            <dt class="font-mono text-sm tracking-wide text-buzz-muted">TÉLÉPHONE</dt>
+            <dd class="mt-1 text-sm text-buzz-text">{{ u.telephone }}</dd>
+          </div>
+        }
+        <div>
+          <dt class="font-mono text-sm tracking-wide text-buzz-muted">RÔLE</dt>
+          <dd class="mt-1 text-sm text-buzz-text">{{ u.role }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <a routerLink="/espace-client/commandes" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="shopping-cart" [size]="16" class="text-buzz-red" /> MES COMMANDES
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Suivre l'historique de vos achats.</p>
+      </a>
+      <a routerLink="/espace-client/adresses" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="map-pin" [size]="16" class="text-buzz-red" /> MES ADRESSES
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Gérer vos adresses de livraison.</p>
+      </a>
+      <a routerLink="/espace-client/liste-souhaits" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="heart" [size]="16" class="text-buzz-red" /> MA LISTE DE SOUHAITS
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Les produits que vous avez mis de côté.</p>
+      </a>
+      <a routerLink="/espace-client/projets" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="folder" [size]="16" class="text-buzz-red" /> MES PROJETS
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Vos demandes de devis structurées.</p>
+      </a>
+      <a routerLink="/espace-client/interventions" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="wrench" [size]="16" class="text-buzz-red" /> MES INTERVENTIONS
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Suivi des visites techniques planifiées.</p>
+      </a>
+      <a routerLink="/espace-client/equipements" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50">
+        <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+          <app-icon name="package" [size]="16" class="text-buzz-red" /> MES ÉQUIPEMENTS
+        </div>
+        <p class="mt-1 text-xs text-buzz-muted">Le matériel installé chez vous.</p>
+      </a>
+      @if (u.role === 'ADMIN') {
+        <a routerLink="/admin" class="border border-buzz-border bg-buzz-surface p-5 transition-colors hover:border-buzz-red/50 sm:col-span-2">
+          <div class="flex items-center gap-2 font-heading text-sm font-semibold text-buzz-text">
+            <app-icon name="grid" [size]="16" class="text-buzz-red" /> ADMINISTRATION
+          </div>
+          <p class="mt-1 text-xs text-buzz-muted">Accéder au tableau de bord admin.</p>
+        </a>
+      }
+    </div>
+
+    <button
+      type="button"
+      (click)="logout()"
+      class="mt-8 flex items-center gap-2 border border-buzz-border px-6 py-3 text-sm font-medium tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2"
+    >
+      <app-icon name="log-out" [size]="16" />
+      SE DÉCONNECTER
+    </button>
+  }
+</section>

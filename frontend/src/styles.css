@@ -1,0 +1,189 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@theme {
+  --color-buzz-bg: #0b0d12;
+  --color-buzz-surface: #12151c;
+  --color-buzz-surface-2: #171b25;
+  --color-buzz-border: #232733;
+  --color-buzz-border-strong: #333a4b;
+  --color-buzz-red: #e7293d;
+  --color-buzz-red-dark: #b91f30;
+  --color-buzz-cyan: #35b8e0;
+  --color-buzz-amber: #f0a63a;
+  --color-buzz-text: #eef0f3;
+  --color-buzz-muted: #8b93a3;
+  --color-buzz-muted-dim: #5c6373;
+
+  --font-heading: "Oswald", sans-serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+/* Thème clair : bascule via l'attribut data-theme sur <html>, piloté par
+   ThemeService. Les classes Tailwind (bg-buzz-bg, text-buzz-muted, etc.)
+   pointent toutes vers ces variables --color-buzz-*, donc les redéfinir
+   ici suffit à retheme toute l'application sans toucher aux composants. */
+:root[data-theme='light'] {
+  --color-buzz-bg: #f5f6f8;
+  --color-buzz-surface: #ffffff;
+  --color-buzz-surface-2: #eef0f3;
+  --color-buzz-border: #e1e4ea;
+  --color-buzz-border-strong: #c7ccd6;
+  --color-buzz-red: #d81f34;
+  --color-buzz-red-dark: #b91f30;
+  --color-buzz-cyan: #0d84a6;
+  --color-buzz-amber: #a85c14;
+  --color-buzz-text: #14171d;
+  --color-buzz-muted: #565e6e;
+  --color-buzz-muted-dim: #8b93a3;
+}
+
+html {
+  transition: background-color 0.2s ease;
+}
+
+body {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html {
+  /* Base 16px -> 18px : agrandit proportionnellement tout le texte
+     (classes Tailwind en rem) sans toucher chaque composant. */
+  font-size: 112.5%;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-buzz-bg);
+  color: var(--color-buzz-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: 0.01em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* On fournit notre propre bouton afficher/masquer sur les champs mot de
+   passe : on désactive les icônes natives des navigateurs pour éviter
+   qu'elles ne se superposent au bouton. */
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+/* Viewfinder corner brackets, used on the hero feed and on service cards on hover */
+.viewfinder {
+  position: relative;
+}
+
+.viewfinder::before,
+.viewfinder::after,
+.viewfinder .vf-tr,
+.viewfinder .vf-bl {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: var(--color-buzz-red);
+  border-style: solid;
+  border-width: 0;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.viewfinder::before {
+  top: 0;
+  left: 0;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.viewfinder::after {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+.viewfinder .vf-tr {
+  top: 0;
+  right: 0;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.viewfinder .vf-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+
+.viewfinder:hover::before,
+.viewfinder:hover::after,
+.viewfinder:hover .vf-tr,
+.viewfinder:hover .vf-bl {
+  width: 22px;
+  height: 22px;
+}
+
+@keyframes buzz-scan {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-buzz-cyan), transparent);
+  animation: buzz-scan 2.8s ease-in-out infinite;
+}
+
+@keyframes buzz-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pulse-dot {
+  animation: buzz-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-line,
+  .pulse-dot {
+    animation: none;
+  }
+}

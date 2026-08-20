@@ -1,0 +1,60 @@
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <div class="mb-4 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">ESPACE CLIENT</span>
+  </div>
+  <h1 class="font-heading text-2xl font-bold text-buzz-text">Mes interventions</h1>
+  <p class="mt-1 text-sm text-buzz-muted">Suivi des visites techniques planifiées chez vous.</p>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && interventions().length === 0) {
+    <div class="viewfinder mt-10 border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="vf-tr"></span>
+      <span class="vf-bl"></span>
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">AUCUNE INTERVENTION</span>
+      <p class="mt-2 text-sm text-buzz-muted">Vous n'avez aucune intervention planifiée pour le moment.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && interventions().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (i of interventions(); track i.id) {
+        <a
+          [routerLink]="['/espace-client/interventions', i.id]"
+          class="flex items-center justify-between gap-4 border border-buzz-border bg-buzz-surface p-4 transition-colors hover:border-buzz-red/50"
+        >
+          <div class="min-w-0">
+            <div class="truncate text-sm font-semibold text-buzz-text">{{ i.title }}</div>
+            <div class="mt-0.5 font-mono text-xs tracking-wide text-buzz-muted">
+              {{ i.scheduledAt | date: 'dd/MM/yyyy HH:mm' }} · {{ statusLabels[i.status] }}
+            </div>
+          </div>
+          <span class="shrink-0 font-mono text-xs text-buzz-cyan"><app-icon name="arrow-right" [size]="14" /></span>
+        </a>
+      }
+    </div>
+
+    @if (meta() && meta()!.totalPages > 1) {
+      <div class="mt-8 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ page() }} / {{ meta()!.totalPages }}</span>
+        <button type="button" [disabled]="page() >= meta()!.totalPages" (click)="goToPage(page() + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="14" />
+        </button>
+      </div>
+    }
+  }
+</section>

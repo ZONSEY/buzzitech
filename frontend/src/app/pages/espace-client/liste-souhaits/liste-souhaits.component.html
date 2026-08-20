@@ -1,0 +1,98 @@
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  <div class="mb-10">
+    <span class="font-mono text-sm tracking-wide text-buzz-cyan">ESPACE CLIENT</span>
+    <h1 class="mt-2 font-heading text-2xl font-bold text-buzz-text sm:text-3xl">Ma liste de souhaits</h1>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="flex flex-col items-center gap-2 py-16 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</span>
+    </div>
+  }
+
+  @if (state() === 'loaded' && items().length === 0) {
+    <div class="viewfinder mx-auto max-w-md border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="vf-tr"></span>
+      <span class="vf-bl"></span>
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="heart" [size]="14" /> LISTE VIDE</span>
+      <h2 class="mt-3 font-heading text-lg font-semibold text-buzz-text">Aucun produit mis de côté</h2>
+      <p class="mt-2 text-sm text-buzz-muted">
+        Cliquez sur le cœur d'un produit dans la boutique pour l'ajouter ici.
+      </p>
+      <a
+        routerLink="/boutique"
+        class="mt-6 inline-block bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+      >
+        DÉCOUVRIR LA BOUTIQUE
+      </a>
+    </div>
+  }
+
+  @if (state() === 'loaded' && items().length > 0) {
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (item of items(); track item.id) {
+        <div class="viewfinder border border-buzz-border bg-buzz-surface">
+          <span class="vf-tr"></span>
+          <span class="vf-bl"></span>
+
+          <a [routerLink]="['/boutique', item.product.slug]" class="block h-48 overflow-hidden bg-buzz-surface-2">
+            @if (item.product.images[0]) {
+              <img
+                [src]="item.product.images[0].url"
+                [alt]="item.product.name"
+                class="h-full w-full object-cover"
+              />
+            } @else {
+              <div class="flex h-full items-center justify-center">
+                <span class="text-xs text-buzz-muted">Pas d'image</span>
+              </div>
+            }
+          </a>
+
+          <div class="p-4">
+            <a [routerLink]="['/boutique', item.product.slug]" class="block truncate text-sm font-semibold text-buzz-text hover:text-buzz-red">
+              {{ item.product.name }}
+            </a>
+
+            <div class="mt-3 flex items-center justify-between">
+              <span class="font-heading text-lg font-bold text-buzz-red">
+                {{ +item.product.price | number: '1.0-0' }} FCFA
+              </span>
+              @if (item.product.stock === 0) {
+                <span class="font-mono text-xs text-buzz-red">ÉPUISÉ</span>
+              }
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              @if (item.product.stock > 0) {
+                <button
+                  type="button"
+                  [disabled]="addingId() === item.product.id"
+                  (click)="addToCart(item.product.id)"
+                  class="flex-1 bg-buzz-red px-3 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+                >
+                  <app-icon name="shopping-cart" [size]="14" /> AJOUTER
+                </button>
+              }
+              <button
+                type="button"
+                [disabled]="removingId() === item.product.id"
+                (click)="remove(item.product.id)"
+                aria-label="Retirer de la liste de souhaits"
+                class="border border-buzz-border px-3 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+              >
+                <app-icon name="x" [size]="12" />
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

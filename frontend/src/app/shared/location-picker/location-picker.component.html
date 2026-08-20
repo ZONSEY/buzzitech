@@ -1,0 +1,72 @@
+<div class="flex flex-col gap-3">
+  <div
+    #mapContainer
+    [style.height.px]="heightPx()"
+    class="w-full overflow-hidden border border-buzz-border bg-buzz-surface-2"
+  ></div>
+
+  @if (!readOnlyMode()) {
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        (click)="useMyLocation()"
+        [disabled]="locating()"
+        class="inline-flex items-center gap-1.5 border border-buzz-border px-3 py-2 text-xs font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+      >
+        <app-icon name="navigation" [size]="13" />
+        @if (locating()) {
+          LOCALISATION...
+        } @else {
+          UTILISER MA POSITION ACTUELLE
+        }
+      </button>
+
+      @if (current()) {
+        <button
+          type="button"
+          (click)="clear()"
+          class="font-mono text-xs tracking-wide text-buzz-red hover:underline"
+        >
+          EFFACER
+        </button>
+      }
+    </div>
+
+    @if (geolocationError()) {
+      <p class="text-xs text-buzz-red">{{ geolocationError() }}</p>
+    }
+
+    <p class="text-xs text-buzz-muted">
+      Cliquez sur la carte pour placer le point, ou faites glisser le repère.
+    </p>
+  }
+
+  @if (current()) {
+    <div>
+      @if (!readOnlyMode()) {
+        <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+          ADRESSE (modifiable)
+        </label>
+        <input
+          type="text"
+          [value]="current()?.address ?? ''"
+          (input)="onAddressInput($any($event.target).value)"
+          [placeholder]="resolvingAddress() ? 'Résolution de l’adresse...' : 'Adresse'"
+          class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+        />
+      } @else if (current()?.address) {
+        <p class="text-sm text-buzz-text">{{ current()?.address }}</p>
+      }
+
+      <a
+        [href]="'https://www.google.com/maps?q=' + current()?.lat + ',' + current()?.lng"
+        target="_blank"
+        rel="noopener"
+        class="mt-2 inline-flex items-center gap-1.5 font-mono text-xs tracking-wide text-buzz-cyan hover:underline"
+      >
+        <app-icon name="map-pin" [size]="12" />
+        OUVRIR DANS GOOGLE MAPS
+      </a>
+    </div>
+  }
+</div>

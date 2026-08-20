@@ -1,0 +1,19 @@
+<div>
+  <canvas
+    #canvas
+    width="400"
+    height="150"
+    class="w-full touch-none border border-buzz-border bg-buzz-bg"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointerleave)="onPointerUp()"
+  ></canvas>
+  <button
+    type="button"
+    (click)="clear()"
+    class="mt-2 font-mono text-xs tracking-wide text-buzz-muted hover:text-buzz-text"
+  >
+    EFFACER LA SIGNATURE
+  </button>
+</div>

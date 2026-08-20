@@ -1,0 +1,229 @@
+<section class="p-6 sm:p-8">
+  <div class="mb-6">
+    <h1 class="font-heading text-2xl font-bold text-buzz-text">Demandes de projet</h1>
+    <p class="mt-1 text-sm text-buzz-muted">Analysez les demandes, chiffrez un devis et suivez leur avancement.</p>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && projects().length === 0) {
+    <p class="py-10 text-sm text-buzz-muted">Aucune demande de projet pour le moment.</p>
+  }
+
+  @if (state() === 'loaded' && projects().length > 0) {
+    <div class="flex flex-col gap-3">
+      @for (p of projects(); track p.id) {
+        <div class="border border-buzz-border bg-buzz-surface">
+          <button
+            type="button"
+            (click)="toggleExpand(p)"
+            class="flex w-full items-center gap-4 p-4 text-left"
+          >
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="truncate text-sm font-semibold text-buzz-text">{{ p.title }}</span>
+                <span
+                  class="shrink-0 font-mono text-[10px] tracking-wide"
+                  [class.text-buzz-cyan]="p.status === 'NEW' || p.status === 'ANALYSIS'"
+                  [class.text-buzz-amber]="p.status === 'APPROVED' || p.status === 'IN_PROGRESS'"
+                  [class.text-white]="p.status === 'COMPLETED'"
+                  [class.text-buzz-red]="p.status === 'CANCELLED'"
+                >
+                  {{ statusLabel(p.status).toUpperCase() }}
+                </span>
+              </div>
+              <div class="mt-0.5 text-xs text-buzz-muted">
+                @if (p.user) {
+                  {{ p.user.prenom }} {{ p.user.nom }} · {{ p.user.email }} ·
+                }
+                {{ p.createdAt | date: 'dd/MM/yyyy' }}
+                @if (p.budget) {
+                  · Budget client : {{ +p.budget | number: '1.0-0' }} FCFA
+                }
+                @if (p.estimatedCost) {
+                  · Devis : {{ +p.estimatedCost | number: '1.0-0' }} FCFA
+                }
+              </div>
+            </div>
+            <app-icon [name]="expandedId() === p.id ? 'x' : 'arrow-right'" [size]="14" class="shrink-0 text-buzz-muted" />
+          </button>
+
+          @if (expandedId() === p.id) {
+            <div class="border-t border-buzz-border p-4">
+              <p class="text-sm leading-relaxed text-buzz-text">{{ p.description }}</p>
+              @if (p.deadline) {
+                <p class="mt-2 font-mono text-xs text-buzz-muted">Échéance souhaitée : {{ p.deadline | date: 'dd/MM/yyyy' }}</p>
+              }
+
+              @if (p.locationLat != null && p.locationLng != null) {
+                <div class="mt-4 border-t border-buzz-border pt-4">
+                  <div class="mb-2 font-mono text-xs tracking-wide text-buzz-muted">LOCALISATION D'INTERVENTION</div>
+                  <app-location-picker
+                    [readOnlyMode]="true"
+                    [heightPx]="180"
+                    [initialLocation]="{ lat: p.locationLat, lng: p.locationLng, address: p.locationAddress ?? null }"
+                  />
+                </div>
+              }
+
+              @if (errorFor() === p.id) {
+                <p class="mt-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> Une erreur est survenue.</p>
+              }
+
+              <!-- Changement de statut -->
+              @if (nextStatuses(p.status).length > 0) {
+                <div class="mt-4">
+                  <div class="mb-1.5 font-mono text-xs tracking-wide text-buzz-muted">FAIRE AVANCER LA DEMANDE</div>
+                  <div class="flex flex-wrap gap-2">
+                    @for (next of nextStatuses(p.status); track next) {
+                      <button
+                        type="button"
+                        [disabled]="savingId() === p.id"
+                        (click)="changeStatus(p, next)"
+                        class="border border-buzz-border px-4 py-2 text-xs font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-50"
+                        [class.hover:border-buzz-red]="next === 'CANCELLED'"
+                      >
+                        {{ next === 'CANCELLED' ? 'ANNULER LA DEMANDE' : ('PASSER À : ' + statusLabel(next).toUpperCase()) }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Lignes du devis -->
+              <div class="mt-5 border-t border-buzz-border pt-4">
+                <div class="mb-2 font-mono text-xs tracking-wide text-buzz-muted">LIGNES DU DEVIS</div>
+
+                @if (p.quoteItems.length > 0) {
+                  <div class="overflow-x-auto border border-buzz-border">
+                    <table class="w-full min-w-[500px] text-left text-sm">
+                      <thead class="border-b border-buzz-border bg-buzz-bg">
+                        <tr class="font-mono text-xs tracking-wide text-buzz-muted">
+                          <th class="px-3 py-2">Désignation</th>
+                          <th class="px-3 py-2 text-right">Qté</th>
+                          <th class="px-3 py-2 text-right">Prix unitaire</th>
+                          <th class="px-3 py-2 text-right">Total</th>
+                          <th class="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (item of p.quoteItems; track item.id) {
+                          <tr class="border-b border-buzz-border last:border-0">
+                            <td class="px-3 py-2 text-buzz-text">{{ item.designation }}</td>
+                            <td class="px-3 py-2 text-right text-buzz-muted">{{ item.quantity }}</td>
+                            <td class="px-3 py-2 text-right text-buzz-muted">{{ +item.unitPrice | number: '1.0-0' }} FCFA</td>
+                            <td class="px-3 py-2 text-right text-buzz-text">{{ +item.unitPrice * item.quantity | number: '1.0-0' }} FCFA</td>
+                            <td class="px-3 py-2 text-right">
+                              <button
+                                type="button"
+                                [disabled]="itemBusyId() === p.id"
+                                (click)="removeLineItem(p, item)"
+                                aria-label="Supprimer cette ligne"
+                                class="text-buzz-muted hover:text-buzz-red disabled:opacity-50"
+                              >
+                                <app-icon name="x" [size]="12" />
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="mt-2 flex flex-col items-end gap-0.5 font-mono text-xs text-buzz-muted">
+                    <span>Total HT : {{ totalHT(p) | number: '1.0-0' }} FCFA</span>
+                    <span>TVA ({{ vatRate * 100 }}%) : {{ totalTVA(p) | number: '1.0-0' }} FCFA</span>
+                    <span class="text-sm font-semibold text-buzz-text">Total TTC : {{ totalTTC(p) | number: '1.0-0' }} FCFA</span>
+                  </div>
+                } @else {
+                  <p class="text-sm text-buzz-muted">Aucune ligne pour le moment — ajoutez un produit ou une prestation ci-dessous.</p>
+                }
+
+                <form [formGroup]="lineItemForm" (ngSubmit)="addLineItem(p)" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_100px_140px_auto]">
+                  <input
+                    type="text"
+                    formControlName="designation"
+                    placeholder="Ex : Kit alarme incendie sans fil"
+                    class="w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted outline-none focus:border-buzz-red"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    formControlName="quantity"
+                    placeholder="Qté"
+                    class="w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted outline-none focus:border-buzz-red"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    formControlName="unitPrice"
+                    placeholder="Prix unitaire (FCFA)"
+                    class="w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted outline-none focus:border-buzz-red"
+                  />
+                  <button
+                    type="submit"
+                    [disabled]="itemBusyId() === p.id"
+                    class="border border-buzz-border px-4 py-2 text-xs font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-50"
+                  >
+                    + AJOUTER
+                  </button>
+                </form>
+              </div>
+
+              <!-- Détails complémentaires -->
+              <form [formGroup]="estimateForm" (ngSubmit)="saveEstimate(p)" class="mt-5 border-t border-buzz-border pt-4">
+                <div class="mb-2 font-mono text-xs tracking-wide text-buzz-muted">DÉTAILS COMPLÉMENTAIRES</div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1 block font-mono text-xs tracking-wide text-buzz-muted">DURÉE ESTIMÉE (JOURS)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      formControlName="estimatedDuration"
+                      class="w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text outline-none focus:border-buzz-red"
+                    />
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="mb-1 block font-mono text-xs tracking-wide text-buzz-muted">COMMENTAIRE (visible par le client)</label>
+                    <textarea
+                      rows="3"
+                      formControlName="adminComment"
+                      class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text outline-none focus:border-buzz-red"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    [disabled]="savingId() === p.id"
+                    class="bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+                  >
+                    {{ savingId() === p.id ? 'ENREGISTREMENT...' : 'ENREGISTRER' }}
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="downloadingId() === p.id"
+                    (click)="downloadQuote(p)"
+                    class="inline-flex items-center gap-1.5 font-mono text-xs tracking-wide text-buzz-cyan hover:underline disabled:opacity-50"
+                  >
+                    <app-icon name="download" [size]="12" />
+                    {{ downloadingId() === p.id ? 'GÉNÉRATION...' : 'TÉLÉCHARGER LE DEVIS PDF' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

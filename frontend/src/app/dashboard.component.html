@@ -1,0 +1,98 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>Tableau de bord</h1>
+    <div *ngIf="notification()" class="notification-banner">
+      Nouvelle notification : {{ notification() }}
+    </div>
+  </header>
+
+  <section class="overview-grid" *ngIf="dashboard() as data">
+    <div class="card">
+      <h2>Chiffre d'affaires</h2>
+      <p>{{ data.overview.revenue | number:'1.0-0' }} FCFA</p>
+    </div>
+    <div class="card">
+      <h2>Ventes mensuelles</h2>
+      <p>{{ data.sales.length }} jours</p>
+    </div>
+    <div class="card">
+      <h2>Nouveaux clients</h2>
+      <p>{{ data.kpis.newUsersToday }}</p>
+    </div>
+    <div class="card">
+      <h2>Produits en rupture</h2>
+      <p>{{ data.alerts.outOfStock }}</p>
+    </div>
+  </section>
+
+  <section class="cards-row" *ngIf="dashboard() as data">
+    <article class="card large-card">
+      <h2>Produits les plus vendus</h2>
+      <ul>
+        <li *ngFor="let item of data.topProducts">
+          {{ item.product?.name ?? 'Produit inconnu' }} - {{ item.totalSold }} vendus
+        </li>
+      </ul>
+    </article>
+
+    <article class="card large-card">
+      <h2>Services les plus demandés</h2>
+      <ul>
+        <li *ngFor="let item of data.topServices">
+          {{ item.service?.name ?? 'Service inconnu' }} - {{ item.totalSold }} demandés
+        </li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="row-cards" *ngIf="dashboard() as data">
+    <div class="card small-card">
+      <h3>Commandes aujourd'hui</h3>
+      <p>{{ data.kpis.ordersToday }}</p>
+    </div>
+    <div class="card small-card">
+      <h3>Valeur moyenne commande</h3>
+      <p>{{ data.kpis.averageOrderValue | number:'1.0-0' }} FCFA</p>
+    </div>
+    <div class="card small-card">
+      <h3>Revenus (30j)</h3>
+      <p>{{ data.trends.revenue.current | number:'1.0-0' }} FCFA</p>
+    </div>
+    <div class="card small-card">
+      <h3>Activités récentes</h3>
+      <p>{{ data.recentActivities.length }} éléments</p>
+    </div>
+  </section>
+
+  <section class="upload-section">
+    <div class="card upload-card">
+      <h2>Uploader un avatar</h2>
+      <label>
+        ID utilisateur
+        <input type="text" [value]="userId()" (input)="userId.set($any($event.target).value)" />
+      </label>
+      <label>
+        Sélectionner une photo
+        <input type="file" accept="image/*" (change)="onAvatarFileSelected($event)" />
+      </label>
+      <button type="button" (click)="uploadAvatar()">Uploader l'avatar</button>
+      <p class="status-message" *ngIf="avatarUploadMessage()">{{ avatarUploadMessage() }}</p>
+      <img class="preview-image" *ngIf="avatarPreviewUrl()" [src]="avatarPreviewUrl()" alt="Aperçu de l avatar" />
+    </div>
+
+    <div class="card upload-card">
+      <h2>Uploader une image produit</h2>
+      <label>
+        ID produit
+        <input type="text" [value]="productId()" (input)="productId.set($any($event.target).value)" />
+      </label>
+      <label>
+        Sélectionner une image
+        <input type="file" accept="image/*" (change)="onProductFileSelected($event)" />
+      </label>
+      <button type="button" (click)="uploadProductImage()">Uploader l'image</button>
+      <p class="status-message" *ngIf="productUploadMessage()">{{ productUploadMessage() }}</p>
+      <a class="uploaded-link" *ngIf="productUploadUrl()" [href]="productUploadUrl()" target="_blank">Voir l'image uploadée</a>
+    </div>
+  </section>
+</div>

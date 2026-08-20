@@ -1,0 +1,154 @@
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  <div class="mb-4 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+      NOUS CONTACTER
+    </span>
+  </div>
+
+  <h1 class="font-heading text-3xl font-bold text-buzz-text sm:text-4xl">
+    Demandez votre audit <span class="text-buzz-red">stratégique</span>
+  </h1>
+  <p class="mt-4 max-w-xl text-sm leading-relaxed text-buzz-muted">
+    Parlez-nous de votre besoin en sécurité électronique, protection incendie,
+    réseaux ou conseil. Réponse garantie sous 24h.
+  </p>
+
+  <div class="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-5">
+    <!-- Form -->
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="lg:col-span-3 border border-buzz-border bg-buzz-surface p-6 sm:p-8"
+    >
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="sm:col-span-1">
+          <label for="name" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            NOM COMPLET
+          </label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.name.invalid && f.name.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Votre nom est requis.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-1">
+          <label for="email" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            EMAIL
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.email.invalid && f.email.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Un email valide est requis.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-1">
+          <label for="phone" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            TÉLÉPHONE (optionnel)
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div class="sm:col-span-1">
+          <label for="subject" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            SUJET
+          </label>
+          <input
+            id="subject"
+            type="text"
+            formControlName="subject"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.subject.invalid && f.subject.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Le sujet est requis.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="message" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            MESSAGE
+          </label>
+          <textarea
+            id="message"
+            rows="5"
+            formControlName="message"
+            class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          ></textarea>
+          @if (f.message.invalid && f.message.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Votre message est requis.</p>
+          }
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="state() === 'submitting'"
+        class="mt-6 bg-buzz-red px-7 py-3.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        @if (state() === 'submitting') {
+          ENVOI EN COURS...
+        } @else {
+          ENVOYER LE MESSAGE <app-icon name="arrow-right" [size]="14" />
+        }
+      </button>
+
+      @if (state() === 'success') {
+        <p class="mt-4 font-mono text-xs text-buzz-cyan">
+          <app-icon name="check" [size]="12" /> Message envoyé. Nous revenons vers vous sous 24h.
+        </p>
+      }
+      @if (state() === 'error') {
+        <p class="mt-4 font-mono text-xs text-buzz-red">
+          <app-icon name="x" [size]="12" /> Une erreur est survenue. Réessayez ou appelez-nous directement.
+        </p>
+      }
+    </form>
+
+    <!-- Coordinates -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+      <div class="border border-buzz-border bg-buzz-surface p-6">
+        <div class="flex items-start gap-3">
+          <app-icon name="map-pin" [size]="16" class="text-buzz-red" />
+          <div>
+            <div class="font-mono text-sm tracking-wide text-buzz-muted">ADRESSE</div>
+            <div class="mt-1 text-sm text-buzz-text">Ouagadougou, Burkina Faso</div>
+          </div>
+        </div>
+      </div>
+      <div class="border border-buzz-border bg-buzz-surface p-6">
+        <div class="flex items-start gap-3">
+          <app-icon name="phone" [size]="16" class="text-buzz-red" />
+          <div>
+            <div class="font-mono text-sm tracking-wide text-buzz-muted">TÉLÉPHONE</div>
+            <div class="mt-1 text-sm text-buzz-text">+226 04 04 18 22</div>
+            <div class="text-sm text-buzz-text">79 66 60 66</div>
+          </div>
+        </div>
+      </div>
+      <div class="border border-buzz-border bg-buzz-surface p-6">
+        <div class="flex items-start gap-3">
+          <app-icon name="mail" [size]="16" class="text-buzz-red" />
+          <div>
+            <div class="font-mono text-sm tracking-wide text-buzz-muted">EMAIL</div>
+            <div class="mt-1 text-sm text-buzz-text">info&#64;buzzitech.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

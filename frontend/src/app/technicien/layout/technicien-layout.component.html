@@ -1,0 +1,58 @@
+<div class="flex min-h-screen bg-buzz-bg">
+  <!-- Sidebar -->
+  <aside class="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-buzz-border bg-buzz-surface">
+    <div class="flex items-center gap-2.5 border-b border-buzz-border px-5 py-5">
+      <span class="flex shrink-0 items-center rounded bg-white px-2 py-1">
+        <img src="/logo-buzzitech.png" alt="BUZZITECH" class="h-6 w-auto" />
+      </span>
+      <span class="font-heading text-sm font-semibold text-buzz-muted">TECHNICIEN</span>
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+      <a
+        routerLink="/technicien"
+        routerLinkActive="bg-buzz-surface-2 text-buzz-text"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2.5 rounded px-3 py-2.5 font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+      >
+        <app-icon name="calendar" [size]="15" />
+        Mon planning
+      </a>
+      <a
+        routerLink="/technicien/historique"
+        routerLinkActive="bg-buzz-surface-2 text-buzz-text"
+        class="flex items-center gap-2.5 rounded px-3 py-2.5 font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+      >
+        <app-icon name="clock" [size]="15" />
+        Historique
+      </a>
+    </nav>
+
+    <div class="shrink-0 border-t border-buzz-border p-3">
+      @if (currentUser(); as u) {
+        <div class="px-3 pb-2 font-mono text-xs tracking-wide text-buzz-muted">
+          {{ u.prenom }} {{ u.nom }}
+        </div>
+      }
+      <button
+        type="button"
+        (click)="logout()"
+        class="flex w-full items-center gap-2.5 rounded px-3 py-2.5 text-left font-mono text-sm tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text"
+      >
+        <app-icon name="log-out" [size]="15" />
+        SE DÉCONNECTER
+      </button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div class="min-w-0 flex-1">
+    <header class="flex items-center justify-end gap-2 border-b border-buzz-border bg-buzz-surface px-5 py-3">
+      <app-theme-toggle />
+      <app-notifications-bell />
+    </header>
+    <main class="overflow-x-hidden">
+      <router-outlet />
+    </main>
+  </div>
+</div>

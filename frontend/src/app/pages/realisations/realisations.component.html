@@ -1,0 +1,116 @@
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  <div class="mb-4 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+      NOS RÉALISATIONS
+    </span>
+  </div>
+
+  <h1 class="font-heading text-3xl font-bold text-buzz-text sm:text-4xl">
+    Des projets <span class="text-buzz-red">livrés sur le terrain</span>
+  </h1>
+  <p class="mt-4 max-w-xl text-sm leading-relaxed text-buzz-muted">
+    Un aperçu de nos interventions récentes en sécurité électronique,
+    protection incendie et réseaux.
+  </p>
+
+  @if (state() === 'loading') {
+    <div class="mt-16 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="mt-16 flex flex-col items-center gap-2 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</span>
+      <p class="text-sm text-buzz-muted">Impossible de contacter le serveur. Réessayez plus tard.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && realisations().length === 0) {
+    <div class="viewfinder mx-auto mt-16 max-w-md border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="vf-tr"></span>
+      <span class="vf-bl"></span>
+      <span class="font-mono text-sm tracking-wide text-buzz-red">● AUCUN SIGNAL</span>
+      <h2 class="mt-3 font-heading text-lg font-semibold text-buzz-text">Aucune réalisation publiée pour le moment</h2>
+      <p class="mt-2 text-sm text-buzz-muted">
+        Nos premiers projets seront bientôt mis en ligne. Contactez-nous pour des références.
+      </p>
+      <a
+        routerLink="/contact"
+        class="mt-6 inline-block bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+      >
+        NOUS CONTACTER
+      </a>
+    </div>
+  }
+
+  @if (state() === 'loaded' && realisations().length > 0) {
+    <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (item of realisations(); track item.id) {
+        <a
+          [routerLink]="['/realisations', item.slug]"
+          class="viewfinder flex flex-col border border-buzz-border bg-buzz-surface transition-colors hover:border-buzz-red/50"
+        >
+          <span class="vf-tr"></span>
+          <span class="vf-bl"></span>
+
+          <div class="flex h-44 items-center justify-center overflow-hidden bg-buzz-surface-2">
+            @if (coverImage(item)) {
+              <img [src]="coverImage(item)" [alt]="item.title" class="h-full w-full object-cover" />
+            } @else {
+              <span class="text-xs text-buzz-muted">Pas d'image</span>
+            }
+          </div>
+
+          <div class="flex flex-1 flex-col p-5">
+            @if (item.category) {
+              <span class="font-mono text-xs tracking-wide text-buzz-cyan">
+                {{ item.category.name }}
+              </span>
+            }
+            <h3 class="mt-1 font-heading text-sm font-semibold text-buzz-text">
+              {{ item.title }}
+            </h3>
+            <p class="mt-1 line-clamp-2 flex-1 text-xs leading-relaxed text-buzz-muted">
+              {{ item.shortDescription ?? item.description }}
+            </p>
+
+            <div class="mt-3 flex items-center justify-between border-t border-buzz-border pt-3 font-mono text-xs text-buzz-muted">
+              @if (item.location) {
+                <span class="inline-flex items-center gap-1"><app-icon name="map-pin" [size]="14" /> {{ item.location }}</span>
+              }
+              @if (item.completedAt) {
+                <span>{{ item.completedAt | date: 'MM/yyyy' }}</span>
+              }
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (meta().totalPages > 1) {
+      <div class="mt-10 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          [disabled]="meta().page <= 1"
+          (click)="goToPage(meta().page - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+        >
+          <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">
+          PAGE {{ meta().page }} / {{ meta().totalPages }}
+        </span>
+        <button
+          type="button"
+          [disabled]="meta().page >= meta().totalPages"
+          (click)="goToPage(meta().page + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-40"
+        >
+          SUIVANT <app-icon name="arrow-right" [size]="14" />
+        </button>
+      </div>
+    }
+  }
+</section>

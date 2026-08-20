@@ -1,0 +1,19 @@
+<section class="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
+  @if (state() === 'loading') {
+    <span class="font-mono text-sm tracking-wide text-buzz-muted">VÉRIFICATION EN COURS...</span>
+  }
+
+  @if (state() === 'success') {
+    <span class="font-mono text-sm tracking-wide text-buzz-cyan"><app-icon name="check" [size]="12" /> EMAIL VÉRIFIÉ AVEC SUCCÈS</span>
+    <a routerLink="/espace-client" class="mt-4 text-sm text-buzz-red hover:underline">
+      Accéder à mon espace <app-icon name="arrow-right" [size]="14" />
+    </a>
+  }
+
+  @if (state() === 'error') {
+    <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> LIEN INVALIDE OU EXPIRÉ</span>
+    <a routerLink="/espace-client" class="mt-4 text-sm text-buzz-red hover:underline">
+      Retour à mon espace
+    </a>
+  }
+</section>

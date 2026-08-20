@@ -1,0 +1,243 @@
+<section class="p-6 sm:p-8">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Interventions</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Planification et suivi des missions techniciens.</p>
+    </div>
+    <button
+      type="button"
+      (click)="toggleCreateForm()"
+      class="bg-buzz-red px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+    >
+      {{ showCreateForm() ? 'FERMER' : '+ NOUVELLE INTERVENTION' }}
+    </button>
+  </div>
+
+  @if (showCreateForm()) {
+    <form
+      [formGroup]="createForm"
+      (ngSubmit)="createIntervention()"
+      class="mb-8 border border-buzz-border bg-buzz-surface p-5"
+    >
+      @if (createError()) {
+        <p class="mb-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ createError() }}</p>
+      }
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">
+            DEMANDE DE PROJET LIÉE (OPTIONNEL)
+          </label>
+          <select
+            formControlName="projectRequestId"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          >
+            <option value="">— Aucune —</option>
+            @for (p of linkableProjects(); track p.id) {
+              <option [value]="p.id">
+                {{ p.title }} — {{ p.user?.prenom }} {{ p.user?.nom }}
+              </option>
+            }
+          </select>
+          <p class="mt-1 text-xs text-buzz-muted">
+            En sélectionnant une demande, le client, le titre et la localisation choisie par le
+            client sont repris automatiquement (modifiables ci-dessous).
+          </p>
+        </div>
+
+        <div class="relative">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">CLIENT</label>
+          <input
+            type="text"
+            formControlName="clientSearch"
+            placeholder="Rechercher un client par nom/email..."
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+          @if (clientResults().length > 0) {
+            <div class="absolute z-10 mt-1 w-full border border-buzz-border bg-buzz-surface shadow-lg">
+              @for (c of clientResults(); track c.id) {
+                <button
+                  type="button"
+                  (click)="pickClient(c)"
+                  class="block w-full px-3 py-2 text-left text-sm text-buzz-text hover:bg-buzz-surface-2"
+                >
+                  {{ c.prenom }} {{ c.nom }} <span class="text-buzz-muted">— {{ c.email }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">TECHNICIEN (OPTIONNEL)</label>
+          <select
+            formControlName="technicianId"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          >
+            <option value="">— Non assigné —</option>
+            @for (t of technicians(); track t.id) {
+              <option [value]="t.id">{{ t.prenom }} {{ t.nom }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">TITRE</label>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Ex : Installation caméra de surveillance"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</label>
+          <textarea
+            formControlName="description"
+            rows="2"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">DATE / HEURE</label>
+          <input
+            type="datetime-local"
+            formControlName="scheduledAt"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">ADRESSE</label>
+          <input
+            type="text"
+            formControlName="addressText"
+            placeholder="Adresse de l'intervention"
+            class="mt-1 w-full border border-buzz-border bg-buzz-bg px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+          />
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="font-mono text-sm tracking-wide text-buzz-muted">
+            LOCALISATION GPS (TRANSMISE AU TECHNICIEN)
+          </label>
+          <div class="mt-1">
+            <app-location-picker
+              [initialLocation]="location()"
+              (locationChange)="onLocationChange($event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="creating()"
+        class="mt-4 bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        {{ creating() ? 'CRÉATION...' : 'CRÉER L\'INTERVENTION' }}
+      </button>
+    </form>
+  }
+
+  <div [formGroup]="filters" class="mb-4 flex flex-wrap gap-3">
+    <input
+      type="text"
+      formControlName="search"
+      placeholder="Rechercher (référence, titre, client)..."
+      class="min-w-0 flex-1 border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text placeholder:text-buzz-muted focus:border-buzz-cyan focus:outline-none"
+    />
+    <select
+      formControlName="status"
+      class="border border-buzz-border bg-buzz-surface px-3 py-2 text-sm text-buzz-text focus:border-buzz-cyan focus:outline-none"
+    >
+      <option value="">Tous les statuts</option>
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ statusLabels[s] }}</option>
+      }
+    </select>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && interventions().length === 0) {
+    <p class="py-10 text-sm text-buzz-muted">Aucune intervention.</p>
+  }
+
+  @if (state() === 'loaded' && interventions().length > 0) {
+    <div class="overflow-x-auto border border-buzz-border">
+      <table class="w-full min-w-[840px] text-left text-sm">
+        <thead class="border-b border-buzz-border bg-buzz-surface">
+          <tr class="font-mono text-sm tracking-wide text-buzz-muted">
+            <th class="px-4 py-3">RÉFÉRENCE</th>
+            <th class="px-4 py-3">TITRE</th>
+            <th class="px-4 py-3">CLIENT</th>
+            <th class="px-4 py-3">DATE</th>
+            <th class="px-4 py-3">STATUT</th>
+            <th class="px-4 py-3">TECHNICIEN</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of interventions(); track i.id) {
+            <tr class="border-b border-buzz-border last:border-0">
+              <td class="px-4 py-3 font-mono text-xs text-buzz-cyan">{{ i.reference }}</td>
+              <td class="px-4 py-3 text-buzz-text">{{ i.title }}</td>
+              <td class="px-4 py-3 text-buzz-muted">{{ i.client.prenom }} {{ i.client.nom }}</td>
+              <td class="px-4 py-3 font-mono text-xs text-buzz-muted">{{ i.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="px-4 py-3 font-mono text-xs">{{ statusLabels[i.status] }}</td>
+              <td class="px-4 py-3">
+                <select
+                  [value]="i.technicianId ?? ''"
+                  [disabled]="updatingId() === i.id || i.status === 'COMPLETED' || i.status === 'CANCELLED'"
+                  (change)="assignTechnician(i, $any($event.target).value)"
+                  class="border border-buzz-border bg-buzz-bg px-2 py-1.5 text-xs text-buzz-text focus:border-buzz-cyan focus:outline-none disabled:opacity-50"
+                >
+                  <option value="">— Non assigné —</option>
+                  @for (t of technicians(); track t.id) {
+                    <option [value]="t.id">{{ t.prenom }} {{ t.nom }}</option>
+                  }
+                </select>
+              </td>
+              <td class="px-4 py-3 text-right">
+                @if (i.status !== 'COMPLETED' && i.status !== 'CANCELLED') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === i.id"
+                    (click)="cancelIntervention(i)"
+                    class="font-mono text-xs text-buzz-muted hover:text-buzz-red disabled:opacity-50"
+                  >
+                    ANNULER
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (meta() && meta()!.totalPages > 1) {
+      <div class="mt-6 flex items-center justify-center gap-2">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          <app-icon name="arrow-left" [size]="14" /> PRÉCÉDENT
+        </button>
+        <span class="font-mono text-xs text-buzz-muted">PAGE {{ page() }} / {{ meta()!.totalPages }}</span>
+        <button type="button" [disabled]="page() >= meta()!.totalPages" (click)="goToPage(page() + 1)"
+          class="border border-buzz-border px-3 py-2 text-xs text-buzz-text hover:bg-buzz-surface-2 disabled:opacity-40">
+          SUIVANT <app-icon name="arrow-right" [size]="14" />
+        </button>
+      </div>
+    }
+  }
+</section>

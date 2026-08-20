@@ -1,0 +1,54 @@
+<section class="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 sm:px-6">
+  <div class="mb-6 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">
+      ESPACE CLIENT
+    </span>
+  </div>
+
+  <h1 class="font-heading text-3xl font-bold text-buzz-text">Mot de passe oublié</h1>
+  <p class="mt-2 text-sm text-buzz-muted">
+    Indiquez votre email, nous vous enverrons un lien de réinitialisation.
+  </p>
+
+  @if (sent()) {
+    <p class="mt-8 font-mono text-xs text-buzz-cyan">
+      <app-icon name="check" [size]="12" /> SI CET EMAIL EXISTE, UN LIEN VIENT DE LUI ÊTRE ENVOYÉ.
+    </p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-5">
+      <div>
+        <label for="email" class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">EMAIL</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="w-full border border-buzz-border bg-buzz-surface px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+        />
+        @if (f.email.invalid && f.email.touched) {
+          <p class="mt-1 text-xs text-buzz-red">Un email valide est requis.</p>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <p class="font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ errorMessage() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="mt-2 bg-buzz-red px-7 py-3.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        @if (submitting()) {
+          ENVOI...
+        } @else {
+          ENVOYER LE LIEN <app-icon name="arrow-right" [size]="14" />
+        }
+      </button>
+    </form>
+  }
+
+  <p class="mt-6 text-center text-sm text-buzz-muted">
+    <a routerLink="/espace-client/connexion" class="text-buzz-red hover:underline"><app-icon name="arrow-left" [size]="14" /> Retour à la connexion</a>
+  </p>
+</section>

@@ -1,0 +1,384 @@
+<section class="mx-auto max-w-5xl px-6 py-10">
+  <div>
+    <h1 class="font-heading text-2xl font-bold text-buzz-text">Catégories & marques</h1>
+    <p class="mt-1 text-sm text-buzz-muted">
+      Gérez les catégories et marques utilisées dans le formulaire produit, ainsi que les
+      catégories de services utilisées par les Offres et les Réalisations.
+    </p>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded') {
+    <!-- Catégories -->
+    <div class="mt-8">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading text-sm font-semibold text-buzz-text">CATÉGORIES</h2>
+        @if (!categoryFormOpen()) {
+          <button
+            type="button"
+            (click)="toggleCategoryForm()"
+            class="bg-buzz-red px-4 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+          >
+            + NOUVELLE CATÉGORIE
+          </button>
+        }
+      </div>
+
+      @if (categoryFormOpen()) {
+        <form
+          [formGroup]="categoryForm"
+          (ngSubmit)="submitCategory()"
+          class="mt-4 border border-buzz-border bg-buzz-surface p-5"
+        >
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">NOM</label>
+              <input
+                type="text"
+                formControlName="name"
+                (input)="onCategoryNameChange($any($event.target).value)"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+              @if (cf.name.invalid && cf.name.touched) {
+                <p class="mt-1 text-xs text-buzz-red">Le nom est requis.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">SLUG</label>
+              <input
+                type="text"
+                formControlName="slug"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION (optionnel)</label>
+              <textarea
+                rows="2"
+                formControlName="description"
+                class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              ></textarea>
+            </div>
+          </div>
+
+          @if (categoryError()) {
+            <p class="mt-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ categoryError() }}</p>
+          }
+
+          <div class="mt-4 flex gap-3">
+            <button
+              type="submit"
+              [disabled]="categorySubmitting()"
+              class="bg-buzz-red px-5 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              @if (categorySubmitting()) {
+                ENREGISTREMENT...
+              } @else {
+                ENREGISTRER
+              }
+            </button>
+            <button
+              type="button"
+              (click)="toggleCategoryForm()"
+              class="border border-buzz-border px-5 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2"
+            >
+              ANNULER
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (categories().length === 0) {
+        <p class="mt-6 text-sm text-buzz-muted">Aucune catégorie pour le moment.</p>
+      } @else {
+        <div class="mt-4 flex flex-col gap-2">
+          @for (cat of categories(); track cat.id) {
+            <div class="flex items-center gap-4 border border-buzz-border bg-buzz-surface p-3.5">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="truncate text-sm font-semibold text-buzz-text">{{ cat.name }}</span>
+                  @if (!cat.isActive) {
+                    <span class="font-mono text-xs text-buzz-red">MASQUÉE</span>
+                  }
+                </div>
+                <div class="mt-0.5 font-mono text-xs text-buzz-muted">{{ cat.slug }}</div>
+              </div>
+
+              <button
+                type="button"
+                [disabled]="categoryBusyId() === cat.id"
+                (click)="toggleCategoryActive(cat)"
+                class="font-mono text-xs tracking-wide text-buzz-text hover:underline disabled:opacity-60"
+              >
+                {{ cat.isActive ? 'MASQUER' : 'PUBLIER' }}
+              </button>
+              <button
+                type="button"
+                [disabled]="categoryBusyId() === cat.id"
+                (click)="removeCategory(cat)"
+                class="font-mono text-xs tracking-wide text-buzz-red hover:underline disabled:opacity-60"
+              >
+                SUPPRIMER
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Marques -->
+    <div class="mt-12">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading text-sm font-semibold text-buzz-text">MARQUES</h2>
+        @if (!brandFormOpen()) {
+          <button
+            type="button"
+            (click)="toggleBrandForm()"
+            class="bg-buzz-red px-4 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+          >
+            + NOUVELLE MARQUE
+          </button>
+        }
+      </div>
+
+      @if (brandFormOpen()) {
+        <form
+          [formGroup]="brandForm"
+          (ngSubmit)="submitBrand()"
+          class="mt-4 border border-buzz-border bg-buzz-surface p-5"
+        >
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">NOM</label>
+              <input
+                type="text"
+                formControlName="name"
+                (input)="onBrandNameChange($any($event.target).value)"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+              @if (bf.name.invalid && bf.name.touched) {
+                <p class="mt-1 text-xs text-buzz-red">Le nom est requis.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">SLUG</label>
+              <input
+                type="text"
+                formControlName="slug"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">LOGO — URL (optionnel)</label>
+              <input
+                type="text"
+                formControlName="logo"
+                placeholder="https://..."
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+            </div>
+          </div>
+
+          @if (brandError()) {
+            <p class="mt-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ brandError() }}</p>
+          }
+
+          <div class="mt-4 flex gap-3">
+            <button
+              type="submit"
+              [disabled]="brandSubmitting()"
+              class="bg-buzz-red px-5 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              @if (brandSubmitting()) {
+                ENREGISTREMENT...
+              } @else {
+                ENREGISTRER
+              }
+            </button>
+            <button
+              type="button"
+              (click)="toggleBrandForm()"
+              class="border border-buzz-border px-5 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2"
+            >
+              ANNULER
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (brands().length === 0) {
+        <p class="mt-6 text-sm text-buzz-muted">Aucune marque pour le moment.</p>
+      } @else {
+        <div class="mt-4 flex flex-col gap-2">
+          @for (brand of brands(); track brand.id) {
+            <div class="flex items-center gap-4 border border-buzz-border bg-buzz-surface p-3.5">
+              @if (brand.logo) {
+                <img [src]="brand.logo" [alt]="brand.name" class="h-8 w-8 shrink-0 object-contain" />
+              }
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="truncate text-sm font-semibold text-buzz-text">{{ brand.name }}</span>
+                  @if (!brand.isActive) {
+                    <span class="font-mono text-xs text-buzz-red">MASQUÉE</span>
+                  }
+                </div>
+                <div class="mt-0.5 font-mono text-xs text-buzz-muted">{{ brand.slug }}</div>
+              </div>
+
+              <button
+                type="button"
+                [disabled]="brandBusyId() === brand.id"
+                (click)="toggleBrandActive(brand)"
+                class="font-mono text-xs tracking-wide text-buzz-text hover:underline disabled:opacity-60"
+              >
+                {{ brand.isActive ? 'MASQUER' : 'PUBLIER' }}
+              </button>
+              <button
+                type="button"
+                [disabled]="brandBusyId() === brand.id"
+                (click)="removeBrand(brand)"
+                class="font-mono text-xs tracking-wide text-buzz-red hover:underline disabled:opacity-60"
+              >
+                SUPPRIMER
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Catégories de services (Offres & Réalisations) -->
+    <div class="mt-12">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading text-sm font-semibold text-buzz-text">
+          CATÉGORIES DE SERVICES <span class="text-buzz-muted">(OFFRES & RÉALISATIONS)</span>
+        </h2>
+        @if (!serviceCategoryFormOpen()) {
+          <button
+            type="button"
+            (click)="toggleServiceCategoryForm()"
+            class="bg-buzz-red px-4 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+          >
+            + NOUVELLE CATÉGORIE
+          </button>
+        }
+      </div>
+
+      @if (serviceCategoryFormOpen()) {
+        <form
+          [formGroup]="serviceCategoryForm"
+          (ngSubmit)="submitServiceCategory()"
+          class="mt-4 border border-buzz-border bg-buzz-surface p-5"
+        >
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">NOM</label>
+              <input
+                type="text"
+                formControlName="name"
+                (input)="onServiceCategoryNameChange($any($event.target).value)"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+              @if (scf.name.invalid && scf.name.touched) {
+                <p class="mt-1 text-xs text-buzz-red">Le nom est requis.</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">SLUG</label>
+              <input
+                type="text"
+                formControlName="slug"
+                class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION (optionnel)</label>
+              <textarea
+                rows="2"
+                formControlName="description"
+                class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+              ></textarea>
+            </div>
+          </div>
+
+          @if (serviceCategoryError()) {
+            <p class="mt-3 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ serviceCategoryError() }}</p>
+          }
+
+          <div class="mt-4 flex gap-3">
+            <button
+              type="submit"
+              [disabled]="serviceCategorySubmitting()"
+              class="bg-buzz-red px-5 py-2 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              @if (serviceCategorySubmitting()) {
+                ENREGISTREMENT...
+              } @else {
+                ENREGISTRER
+              }
+            </button>
+            <button
+              type="button"
+              (click)="toggleServiceCategoryForm()"
+              class="border border-buzz-border px-5 py-2 text-xs text-buzz-text transition-colors hover:bg-buzz-surface-2"
+            >
+              ANNULER
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (serviceCategories().length === 0) {
+        <p class="mt-6 text-sm text-buzz-muted">Aucune catégorie de service pour le moment.</p>
+      } @else {
+        <div class="mt-4 flex flex-col gap-2">
+          @for (cat of serviceCategories(); track cat.id) {
+            <div class="flex items-center gap-4 border border-buzz-border bg-buzz-surface p-3.5">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="truncate text-sm font-semibold text-buzz-text">{{ cat.name }}</span>
+                  @if (!cat.isActive) {
+                    <span class="font-mono text-xs text-buzz-red">MASQUÉE</span>
+                  }
+                </div>
+                <div class="mt-0.5 font-mono text-xs text-buzz-muted">{{ cat.slug }}</div>
+              </div>
+
+              <button
+                type="button"
+                [disabled]="serviceCategoryBusyId() === cat.id"
+                (click)="toggleServiceCategoryActive(cat)"
+                class="font-mono text-xs tracking-wide text-buzz-text hover:underline disabled:opacity-60"
+              >
+                {{ cat.isActive ? 'MASQUER' : 'PUBLIER' }}
+              </button>
+              <button
+                type="button"
+                [disabled]="serviceCategoryBusyId() === cat.id"
+                (click)="removeServiceCategory(cat)"
+                class="font-mono text-xs tracking-wide text-buzz-red hover:underline disabled:opacity-60"
+              >
+                SUPPRIMER
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

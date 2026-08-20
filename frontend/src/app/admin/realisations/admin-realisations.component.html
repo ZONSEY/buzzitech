@@ -1,0 +1,243 @@
+<section class="mx-auto max-w-5xl px-6 py-10">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="font-heading text-2xl font-bold text-buzz-text">Réalisations</h1>
+      <p class="mt-1 text-sm text-buzz-muted">Gérez les projets affichés publiquement.</p>
+    </div>
+    @if (!formOpen()) {
+      <button
+        type="button"
+        (click)="openCreateForm()"
+        class="bg-buzz-red px-5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark"
+      >
+        + NOUVELLE RÉALISATION
+      </button>
+    }
+  </div>
+
+  <!-- Form -->
+  @if (formOpen()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="mt-8 border border-buzz-border bg-buzz-surface p-6"
+    >
+      <h2 class="font-heading text-sm font-semibold text-buzz-text">
+        {{ editingId() ? 'MODIFIER LA RÉALISATION' : 'NOUVELLE RÉALISATION' }}
+      </h2>
+
+      <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">TITRE</label>
+          <input
+            type="text"
+            formControlName="title"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+          @if (f.title.invalid && f.title.touched) {
+            <p class="mt-1 text-xs text-buzz-red">Le titre est requis.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</label>
+          <textarea
+            rows="4"
+            formControlName="description"
+            class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          ></textarea>
+          @if (f.description.invalid && f.description.touched) {
+            <p class="mt-1 text-xs text-buzz-red">La description est requise.</p>
+          }
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            DESCRIPTION COURTE (optionnel)
+          </label>
+          <input
+            type="text"
+            formControlName="shortDescription"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">CLIENT (optionnel)</label>
+          <input
+            type="text"
+            formControlName="clientName"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">LIEU (optionnel)</label>
+          <input
+            type="text"
+            formControlName="location"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            DATE DE LIVRAISON (optionnel)
+          </label>
+          <input
+            type="date"
+            formControlName="completedAt"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">CATÉGORIE</label>
+          <select
+            formControlName="categoryId"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          >
+            <option value="">Aucune</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="featured" type="checkbox" formControlName="featured" class="h-4 w-4" />
+          <label for="featured" class="font-mono text-sm tracking-wide text-buzz-muted">MISE EN AVANT</label>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="isActive" type="checkbox" formControlName="isActive" class="h-4 w-4" />
+          <label for="isActive" class="font-mono text-sm tracking-wide text-buzz-muted">PUBLIÉE</label>
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="mt-4 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ errorMessage() }}</p>
+      }
+
+      <div class="mt-6 flex gap-3">
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+        >
+          @if (submitting()) {
+            ENREGISTREMENT...
+          } @else {
+            ENREGISTRER
+          }
+        </button>
+        <button
+          type="button"
+          (click)="cancelForm()"
+          class="border border-buzz-border px-6 py-2.5 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2"
+        >
+          ANNULER
+        </button>
+      </div>
+    </form>
+  }
+
+  <!-- List -->
+  @if (state() === 'loading') {
+    <div class="mt-10 flex justify-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="mt-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && realisations().length === 0 && !formOpen()) {
+    <p class="mt-10 text-sm text-buzz-muted">Aucune réalisation pour le moment.</p>
+  }
+
+  @if (state() === 'loaded' && realisations().length > 0) {
+    <div class="mt-8 flex flex-col gap-3">
+      @for (r of realisations(); track r.id) {
+        <div class="border border-buzz-border bg-buzz-surface p-4">
+          <div class="flex items-center gap-4">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="truncate text-sm font-semibold text-buzz-text">{{ r.title }}</span>
+                @if (!r.isActive) {
+                  <span class="font-mono text-xs text-buzz-red">MASQUÉE</span>
+                }
+                @if (r.featured) {
+                  <span class="font-mono text-xs text-buzz-cyan">MISE EN AVANT</span>
+                }
+              </div>
+              <div class="mt-0.5 text-xs text-buzz-muted">
+                {{ r.category?.name ?? 'Sans catégorie' }}
+                @if (r.location) {
+                  · {{ r.location }}
+                }
+                @if (r.clientName) {
+                  · {{ r.clientName }}
+                }
+                · {{ r.images.length }} photo{{ r.images.length > 1 ? 's' : '' }}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              (click)="openEditForm(r)"
+              class="shrink-0 font-mono text-xs tracking-wide text-buzz-text hover:underline"
+            >
+              MODIFIER
+            </button>
+            <button
+              type="button"
+              (click)="remove(r)"
+              class="shrink-0 font-mono text-xs tracking-wide text-buzz-red hover:underline"
+            >
+              SUPPRIMER
+            </button>
+          </div>
+
+          <!-- Galerie photos du chantier -->
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            @for (img of sortedImages(r); track img.id) {
+              <div class="relative h-16 w-16 shrink-0 overflow-hidden border" [class.border-buzz-cyan]="img.isPrimary" [class.border-buzz-border]="!img.isPrimary">
+                <img [src]="img.url" [alt]="r.title" class="h-full w-full object-cover" />
+                @if (img.isPrimary) {
+                  <span class="absolute bottom-0 left-0 right-0 bg-buzz-cyan/90 py-0.5 text-center font-mono text-[9px] text-black">COUVERTURE</span>
+                }
+                <button
+                  type="button"
+                  (click)="removeGalleryImage(img, r)"
+                  [disabled]="uploadingFor() === r.id"
+                  aria-label="Supprimer cette photo"
+                  class="absolute right-0 top-0 flex h-4 w-4 items-center justify-center bg-buzz-red text-[10px] text-white disabled:opacity-60"
+                >
+                  <app-icon name="x" [size]="10" />
+                </button>
+              </div>
+            }
+
+            <label class="flex h-16 w-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 border border-dashed border-buzz-border text-buzz-muted hover:border-buzz-cyan hover:text-buzz-cyan">
+              @if (uploadingFor() === r.id) {
+                <span class="font-mono text-[10px]">ENVOI...</span>
+              } @else {
+                <app-icon name="image" [size]="16" />
+                <span class="font-mono text-[9px] tracking-wide">AJOUTER</span>
+              }
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                class="hidden"
+                [disabled]="uploadingFor() === r.id"
+                (change)="onFileSelected($event, r)"
+              />
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,113 @@
+<section class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+  <div class="mb-6">
+    <span class="font-mono text-sm tracking-wide text-buzz-cyan">TECHNICIEN</span>
+    <h1 class="mt-2 font-heading text-2xl font-bold text-buzz-text">Mon planning</h1>
+    <p class="mt-1 text-sm text-buzz-muted">Vos missions assignées.</p>
+  </div>
+
+  @if (stats(); as s) {
+    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="border border-buzz-border bg-buzz-surface p-4">
+        <div class="font-heading text-2xl font-bold text-buzz-text">{{ s.active }}</div>
+        <div class="mt-1 font-mono text-xs tracking-wide text-buzz-muted">MISSIONS ACTIVES</div>
+      </div>
+      <div class="border border-buzz-border bg-buzz-surface p-4">
+        <div class="font-heading text-2xl font-bold text-buzz-cyan">{{ s.today }}</div>
+        <div class="mt-1 font-mono text-xs tracking-wide text-buzz-muted">À RÉALISER AUJOURD'HUI</div>
+      </div>
+      <div class="border border-buzz-border bg-buzz-surface p-4">
+        <div class="font-heading text-2xl font-bold text-buzz-text">{{ s.completedThisMonth }}</div>
+        <div class="mt-1 font-mono text-xs tracking-wide text-buzz-muted">TERMINÉES CE MOIS</div>
+      </div>
+      <div class="border border-buzz-border bg-buzz-surface p-4">
+        <div class="font-heading text-2xl font-bold text-buzz-amber">
+          {{ s.averageRating ?? '—' }}@if (s.averageRating) {<span class="text-sm text-buzz-muted">/5</span>}
+        </div>
+        <div class="mt-1 font-mono text-xs tracking-wide text-buzz-muted">SATISFACTION</div>
+      </div>
+    </div>
+  }
+
+  <div class="mb-6 flex gap-2">
+    <button
+      type="button"
+      (click)="setPeriod('today')"
+      [class.bg-buzz-red]="period() === 'today'"
+      [class.text-white]="period() === 'today'"
+      [class.text-buzz-muted]="period() !== 'today'"
+      class="border border-buzz-border px-4 py-2 font-mono text-sm tracking-wide transition-colors hover:text-buzz-text"
+    >
+      AUJOURD'HUI
+    </button>
+    <button
+      type="button"
+      (click)="setPeriod('week')"
+      [class.bg-buzz-red]="period() === 'week'"
+      [class.text-white]="period() === 'week'"
+      [class.text-buzz-muted]="period() !== 'week'"
+      class="border border-buzz-border px-4 py-2 font-mono text-sm tracking-wide transition-colors hover:text-buzz-text"
+    >
+      CETTE SEMAINE
+    </button>
+    <button
+      type="button"
+      (click)="setPeriod('all')"
+      [class.bg-buzz-red]="period() === 'all'"
+      [class.text-white]="period() === 'all'"
+      [class.text-buzz-muted]="period() !== 'all'"
+      class="border border-buzz-border px-4 py-2 font-mono text-sm tracking-wide transition-colors hover:text-buzz-text"
+    >
+      TOUTES
+    </button>
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <p class="py-10 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</p>
+  }
+
+  @if (state() === 'loaded' && missions().length === 0) {
+    <div class="viewfinder border border-buzz-border bg-buzz-surface px-6 py-14 text-center">
+      <span class="vf-tr"></span>
+      <span class="vf-bl"></span>
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">AUCUNE MISSION</span>
+      <p class="mt-2 text-sm text-buzz-muted">Aucune mission planifiée sur cette période.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && missions().length > 0) {
+    <div class="flex flex-col gap-3">
+      @for (m of missions(); track m.id) {
+        <a
+          [routerLink]="['/technicien/missions', m.id]"
+          class="flex flex-col gap-2 border border-buzz-border bg-buzz-surface p-4 transition-colors hover:border-buzz-red/50 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="truncate text-sm font-semibold text-buzz-text">{{ m.title }}</span>
+              <span class="font-mono text-xs tracking-wide" [class]="statusBadgeClass(m.status)">
+                {{ statusLabels[m.status] }}
+              </span>
+            </div>
+            <div class="mt-1 text-xs text-buzz-muted">
+              {{ m.client.prenom }} {{ m.client.nom }}
+              @if (m.address) {
+                · {{ m.address.city }}, {{ m.address.address }}
+              } @else if (m.addressText) {
+                · {{ m.addressText }}
+              }
+            </div>
+          </div>
+          <div class="shrink-0 font-mono text-sm tracking-wide text-buzz-cyan">
+            {{ m.scheduledAt | date: 'dd/MM/yyyy HH:mm' }}
+          </div>
+        </a>
+      }
+    </div>
+  }
+</section>

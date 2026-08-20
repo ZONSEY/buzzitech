@@ -1,0 +1,247 @@
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+  @if (state() === 'loading') {
+    <div class="flex justify-center py-16">
+      <span class="font-mono text-sm tracking-wide text-buzz-muted">CHARGEMENT...</span>
+    </div>
+  }
+
+  @if (state() === 'not-found') {
+    <div class="flex flex-col items-center gap-3 py-16 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> PRODUIT INTROUVABLE</span>
+      <a routerLink="/boutique" class="text-sm text-buzz-red hover:underline"><app-icon name="arrow-left" [size]="14" /> Retour à la boutique</a>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="flex flex-col items-center gap-2 py-16 text-center">
+      <span class="font-mono text-sm tracking-wide text-buzz-red"><app-icon name="x" [size]="12" /> ÉCHEC DU CHARGEMENT</span>
+      <p class="text-sm text-buzz-muted">Réessayez plus tard.</p>
+    </div>
+  }
+
+  @if (state() === 'loaded' && product(); as p) {
+    <a routerLink="/boutique" class="mb-6 inline-block font-mono text-xs text-buzz-muted hover:text-buzz-text">
+      <app-icon name="arrow-left" [size]="14" /> RETOUR À LA BOUTIQUE
+    </a>
+
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
+      <!-- Gallery -->
+      <div>
+        <div class="viewfinder flex h-80 items-center justify-center overflow-hidden border border-buzz-border bg-buzz-surface sm:h-96">
+          <span class="vf-tr"></span>
+          <span class="vf-bl"></span>
+          @if (activeImage()) {
+            <img [src]="activeImage()" [alt]="p.name" class="h-full w-full object-cover" />
+          } @else {
+            <span class="text-xs text-buzz-muted">Pas d'image</span>
+          }
+        </div>
+
+        @if (p.images.length > 1) {
+          <div class="mt-3 flex gap-2">
+            @for (img of p.images; track img.id) {
+              <button
+                type="button"
+                (click)="selectImage(img.url)"
+                class="h-16 w-16 overflow-hidden border"
+                [class.border-buzz-red]="activeImage() === img.url"
+                [class.border-buzz-border]="activeImage() !== img.url"
+              >
+                <img [src]="img.url" [alt]="img.alt ?? p.name" class="h-full w-full object-cover" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div>
+        <span class="font-mono text-sm tracking-wide text-buzz-cyan">
+          {{ p.category.name.toUpperCase() }} · {{ p.brand.name.toUpperCase() }}
+        </span>
+        <h1 class="mt-2 font-heading text-2xl font-bold text-buzz-text sm:text-3xl">
+          {{ p.name }}
+        </h1>
+
+        <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-buzz-muted">
+          {{ p.description }}
+        </p>
+
+        <div class="mt-6 flex items-center gap-4">
+          <span class="font-heading text-3xl font-bold text-buzz-red">
+            {{ +p.price | number: '1.0-0' }} FCFA
+          </span>
+          @if (p.stock > 0) {
+            <span class="font-mono text-xs text-buzz-muted">EN STOCK ({{ p.stock }})</span>
+          } @else {
+            <span class="font-mono text-xs text-buzz-red">ÉPUISÉ</span>
+          }
+        </div>
+
+        @if (p.warranty) {
+          <p class="mt-2 font-mono text-xs text-buzz-muted">GARANTIE : {{ p.warranty }} MOIS</p>
+        }
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          @if (p.stock > 0) {
+            <button
+              type="button"
+              [disabled]="adding()"
+              (click)="addToCart()"
+              class="bg-buzz-red px-7 py-3.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              @if (adding()) {
+                AJOUT...
+              } @else {
+                AJOUTER AU PANIER <app-icon name="shopping-cart" [size]="16" />
+              }
+            </button>
+          }
+          <a
+            routerLink="/contact"
+            class="border border-buzz-border px-7 py-3.5 text-sm font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2"
+          >
+            DEMANDER UN DEVIS
+          </a>
+
+          <button
+            type="button"
+            [disabled]="togglingWishlist()"
+            (click)="toggleWishlist()"
+            [attr.aria-pressed]="isWishlisted()"
+            [class.border-buzz-red]="isWishlisted()"
+            [class.text-buzz-red]="isWishlisted()"
+            class="border border-buzz-border px-7 py-3.5 text-sm font-semibold tracking-wide text-buzz-text transition-colors hover:bg-buzz-surface-2 disabled:opacity-60"
+          >
+            @if (isWishlisted()) {
+              <app-icon name="heart" [size]="14" [filled]="true" /> DANS MA LISTE
+            } @else {
+              <app-icon name="heart" [size]="14" /> AJOUTER À MA LISTE
+            }
+          </button>
+        </div>
+
+        @if (addedMessage()) {
+          <p class="mt-3 font-mono text-xs text-buzz-cyan">{{ addedMessage() }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Avis -->
+    <div class="mt-12 border-t border-buzz-border pt-10">
+      <div class="flex items-baseline gap-3">
+        <h2 class="font-heading text-lg font-semibold text-buzz-text">Avis clients</h2>
+        @if (reviewCount() > 0) {
+          <span class="font-mono text-xs text-buzz-muted">
+            {{ averageRating() | number: '1.1-1' }} / 5 · {{ reviewCount() }}
+            {{ reviewCount() > 1 ? 'avis' : 'avis' }}
+          </span>
+        }
+      </div>
+
+      @if (reviewsState() === 'loading') {
+        <p class="mt-4 font-mono text-xs text-buzz-muted">CHARGEMENT...</p>
+      }
+
+      @if (reviewsState() === 'loaded' && reviews().length === 0) {
+        <p class="mt-4 text-sm text-buzz-muted">Aucun avis pour ce produit pour le moment.</p>
+      }
+
+      @if (reviewsState() === 'loaded' && reviews().length > 0) {
+        <div class="mt-6 flex flex-col gap-4">
+          @for (review of reviews(); track review.id) {
+            <div class="border border-buzz-border bg-buzz-surface p-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-buzz-text">
+                  {{ review.user.prenom }} {{ review.user.nom }}
+                </span>
+                <span class="font-mono text-xs text-buzz-amber">
+                  @for (s of stars; track s) {
+                    @if (s <= review.rating) { <app-icon name="star" [size]="16" [filled]="true" /> } @else { <app-icon name="star" [size]="16" /> }
+                  }
+                </span>
+              </div>
+              @if (review.comment) {
+                <p class="mt-2 text-sm leading-relaxed text-buzz-muted">{{ review.comment }}</p>
+              }
+              <div class="mt-2 flex items-center justify-between">
+                <span class="font-mono text-xs text-buzz-muted">
+                  {{ review.createdAt | date: 'dd/MM/yyyy' }}
+                </span>
+                @if (review.user.id === currentUserId()) {
+                  <div class="flex gap-3">
+                    <button
+                      type="button"
+                      (click)="startEdit(review)"
+                      class="font-mono text-xs tracking-wide text-buzz-cyan hover:underline"
+                    >
+                      MODIFIER
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deleteReview(review.id)"
+                      class="font-mono text-xs tracking-wide text-buzz-red hover:underline"
+                    >
+                      SUPPRIMER
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (currentUserId() && !myReview() || editingReviewId()) {
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="mt-8 border border-buzz-border bg-buzz-surface p-5">
+          <h3 class="font-heading text-sm font-semibold text-buzz-text">
+            {{ editingReviewId() ? 'MODIFIER MON AVIS' : 'LAISSER UN AVIS' }}
+          </h3>
+
+          <div class="mt-4 flex gap-1 text-2xl text-buzz-amber">
+            @for (s of stars; track s) {
+              <button type="button" (click)="setRating(s)" [attr.aria-label]="'Noter ' + s + ' étoiles'">
+                @if (s <= (reviewForm.value.rating ?? 0)) { <app-icon name="star" [size]="16" [filled]="true" /> } @else { <app-icon name="star" [size]="16" /> }
+              </button>
+            }
+          </div>
+
+          <textarea
+            formControlName="comment"
+            rows="3"
+            placeholder="Votre commentaire (optionnel)"
+            class="mt-3 w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          ></textarea>
+
+          @if (reviewError()) {
+            <p class="mt-2 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ reviewError() }}</p>
+          }
+
+          <div class="mt-4 flex gap-3">
+            <button
+              type="submit"
+              [disabled]="submittingReview()"
+              class="bg-buzz-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+            >
+              {{ submittingReview() ? 'ENVOI...' : 'PUBLIER' }}
+            </button>
+            @if (editingReviewId()) {
+              <button
+                type="button"
+                (click)="cancelEdit()"
+                class="border border-buzz-border px-6 py-2.5 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2"
+              >
+                ANNULER
+              </button>
+            }
+          </div>
+        </form>
+      } @else if (!currentUserId()) {
+        <p class="mt-6 text-sm text-buzz-muted">
+          <a routerLink="/espace-client/connexion" class="text-buzz-red hover:underline">Connectez-vous</a>
+          pour laisser un avis.
+        </p>
+      }
+    </div>
+  }
+</section>

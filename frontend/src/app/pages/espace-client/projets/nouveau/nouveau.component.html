@@ -1,0 +1,93 @@
+<section class="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+  <div class="mb-4 flex items-center gap-2.5">
+    <span class="h-px w-8 bg-buzz-cyan"></span>
+    <span class="font-mono text-xs font-semibold tracking-[0.3em] text-buzz-cyan">NOUVEAU PROJET</span>
+  </div>
+
+  <h1 class="font-heading text-3xl font-bold text-buzz-text">
+    Demandez un <span class="text-buzz-red">devis structuré</span>
+  </h1>
+  <p class="mt-3 text-sm leading-relaxed text-buzz-muted">
+    Décrivez votre projet : nos équipes l'analysent et reviennent vers vous
+    avec une estimation de coût et de durée.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 border border-buzz-border bg-buzz-surface p-6">
+    <div class="flex flex-col gap-5">
+      <div>
+        <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">TITRE DU PROJET</label>
+        <input
+          type="text"
+          formControlName="title"
+          class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+        />
+        @if (f.title.invalid && f.title.touched) {
+          <p class="mt-1 text-xs text-buzz-red">Le titre est requis.</p>
+        }
+      </div>
+
+      <div>
+        <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">DESCRIPTION</label>
+        <textarea
+          rows="6"
+          formControlName="description"
+          placeholder="Décrivez votre besoin : contexte, objectifs, contraintes techniques..."
+          class="w-full resize-none border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+        ></textarea>
+        @if (f.description.invalid && f.description.touched) {
+          <p class="mt-1 text-xs text-buzz-red">La description est requise.</p>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            BUDGET ESTIMÉ EN FCFA (optionnel)
+          </label>
+          <input
+            type="number"
+            formControlName="budget"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+        <div>
+          <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+            ÉCHÉANCE SOUHAITÉE (optionnel)
+          </label>
+          <input
+            type="date"
+            formControlName="deadline"
+            class="w-full border border-buzz-border bg-buzz-bg px-3 py-2.5 text-sm text-buzz-text outline-none focus:border-buzz-red"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1.5 block font-mono text-sm tracking-wide text-buzz-muted">
+          LOCALISATION D'INTERVENTION (optionnel)
+        </label>
+        <app-location-picker (locationChange)="onLocationChange($event)" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="mt-4 font-mono text-xs text-buzz-red"><app-icon name="x" [size]="12" /> {{ errorMessage() }}</p>
+    }
+
+    <div class="mt-6 flex gap-3">
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="bg-buzz-red px-7 py-3.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark disabled:opacity-60"
+      >
+        @if (submitting()) { ENVOI... } @else { ENVOYER LA DEMANDE <app-icon name="arrow-right" [size]="14" /> }
+      </button>
+      <a
+        routerLink="/espace-client/projets"
+        class="border border-buzz-border px-7 py-3.5 text-sm text-buzz-text transition-colors hover:bg-buzz-surface-2"
+      >
+        ANNULER
+      </a>
+    </div>
+  </form>
+</section>
