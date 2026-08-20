@@ -58,7 +58,8 @@ export class CreateProjectRequestDto {
 
   @ApiPropertyOptional({
     example: 'Secteur 15, Ouagadougou, Burkina Faso',
-    description: 'Adresse lisible associée aux coordonnées (géocodage inverse ou saisie libre)',
+    description:
+      'Adresse lisible associée aux coordonnées (géocodage inverse ou saisie libre)',
   })
   @IsOptional()
   @IsString()
