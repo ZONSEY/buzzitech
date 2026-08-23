@@ -10,5 +10,7 @@ RUN npm run build -- --configuration production || npm run build
 FROM nginx:alpine
 COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/docker-entrypoint.d/30-env-config.sh /docker-entrypoint.d/30-env-config.sh
+RUN chmod +x /docker-entrypoint.d/30-env-config.sh
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

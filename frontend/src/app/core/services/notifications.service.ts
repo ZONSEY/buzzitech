@@ -55,7 +55,13 @@ export class NotificationsService {
       return;
     }
 
-    this.socket = io({ path: '/socket.io' });
+    // window.__env.apiBaseUrl (voir env.js / api-base-url.interceptor) :
+    // même mécanisme que les appels HTTP pour pointer le WebSocket vers
+    // l'API quand frontend et backend ne sont pas sur la même origine.
+    const apiBaseUrl = window.__env?.apiBaseUrl;
+    this.socket = apiBaseUrl
+      ? io(apiBaseUrl, { path: '/socket.io' })
+      : io({ path: '/socket.io' });
 
     this.socket.on('connect', () => {
       this.socket?.emit('join', { token });

@@ -37,6 +37,9 @@ services:
     expose:
       - "80"
 
+    environment:
+      API_BASE_URL: ""
+
     depends_on:
       - api
 
