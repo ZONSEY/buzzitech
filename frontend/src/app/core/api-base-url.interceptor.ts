@@ -3,11 +3,7 @@ import { PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 
-declare global {
-  interface Window {
-    __env?: { apiBaseUrl?: string };
-  }
-}
+// Window.__env est déclaré globalement dans src/types/window.d.ts.
 
 /**
  * Réécrit les requêtes /api/... vers une origine absolue quand le
