@@ -11,13 +11,13 @@
     </a>
 
     <!-- Desktop nav -->
-    <nav class="hidden items-center gap-0.5 2xl:flex">
+    <nav class="hidden items-center gap-0.5 lg:flex">
       @for (item of navItems; track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="bg-buzz-surface-2 text-buzz-text"
           [routerLinkActiveOptions]="{ exact: item.path === '/' }"
-          class="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-2 text-sm font-medium tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text 2xl:px-3.5"
+          class="inline-flex items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-2 text-sm font-medium tracking-wide text-buzz-muted transition-colors hover:bg-buzz-surface-2 hover:text-buzz-text lg:px-3.5"
         >
           <app-icon [name]="item.icon" [size]="15" class="shrink-0" />
           {{ item.label }}
@@ -45,7 +45,7 @@
 
       <a
         routerLink="/contact"
-        class="hidden items-center gap-1 whitespace-nowrap bg-buzz-red px-3.5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark 2xl:inline-flex 2xl:px-5"
+        class="hidden items-center gap-1 whitespace-nowrap bg-buzz-red px-3.5 py-2.5 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-buzz-red-dark lg:inline-flex lg:px-5"
       >
         AUDIT GRATUIT <app-icon name="arrow-right" [size]="14" class="shrink-0" />
       </a>
@@ -54,7 +54,7 @@
     <!-- Mobile toggle -->
     <button
       type="button"
-      class="inline-flex h-10 w-10 items-center justify-center rounded border border-buzz-border text-buzz-text 2xl:hidden"
+      class="inline-flex h-10 w-10 items-center justify-center rounded border border-buzz-border text-buzz-text lg:hidden"
       (click)="toggleMenu()"
       aria-label="Ouvrir le menu"
     >
@@ -68,7 +68,7 @@
 
   <!-- Mobile nav -->
   @if (isMenuOpen()) {
-    <nav class="flex flex-col gap-1 border-t border-buzz-border bg-buzz-bg px-4 py-4 2xl:hidden">
+    <nav class="flex flex-col gap-1 border-t border-buzz-border bg-buzz-bg px-4 py-4 lg:hidden">
       @for (item of navItems; track item.path) {
         <a
           [routerLink]="item.path"
