@@ -40,6 +40,11 @@ RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
+# email.module.ts pointe MailerModule sur src/email/templates (chemin
+# résolu via process.cwd() + 'src/...', pas relatif à dist/) — sans ce
+# COPY, le premier envoi d'email (inscription, reset password, etc.)
+# fait un ENOENT qui plante tout le process en production.
+COPY --from=builder /app/src/email/templates ./src/email/templates
 COPY register-paths.js ./
 
 EXPOSE 3000
