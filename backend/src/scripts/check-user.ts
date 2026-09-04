@@ -8,6 +8,11 @@ import { PrismaClient } from 'generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 async function main() {
+  // Log immédiat, avant toute init Prisma : si ça n'apparaît jamais dans
+  // les logs Railway, le script n'est même pas invoqué (souci de parsing
+  // de la commande côté preDeployCommand, pas de notre code).
+  console.log('===CHECK_USER_START===');
+
   const email = process.argv[2];
   if (!email) {
     console.error('Usage: node dist/scripts/check-user.js <email>');
@@ -21,10 +26,18 @@ async function main() {
   }
 
   const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
+    adapter: new PrismaPg({
+      connectionString,
+      // Sans ça, un pool pg qui n'arrive pas à joindre le serveur (ou une
+      // résolution IPv6 qui part dans le vide) attend indéfiniment — pas
+      // d'erreur, pas de log, juste un hang jusqu'à ce que Railway tue le
+      // process côté preDeploy.
+      connectionTimeoutMillis: 8_000,
+    }),
   });
 
   try {
+    console.log('===CHECK_USER_QUERYING===');
     const user = await prisma.user.findUnique({ where: { email } });
     console.log('===CHECK_USER_RESULT===');
     console.log(JSON.stringify(user));
