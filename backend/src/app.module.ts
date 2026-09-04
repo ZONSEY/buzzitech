@@ -33,6 +33,7 @@ import { SearchModule } from './search/search.module';
 import { PromoCodesModule } from './promo-codes/promo-codes.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { MaintenanceContractsModule } from './maintenance-contracts/maintenance-contracts.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 import { envValidationSchema } from './config/env.validation';
 
 import {
@@ -112,6 +113,7 @@ import {
     PromoCodesModule,
     EquipmentModule,
     MaintenanceContractsModule,
+    MaintenanceModule,
   ],
   providers: [
     {
