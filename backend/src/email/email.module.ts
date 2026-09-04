@@ -31,6 +31,16 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.ad
 
             pass: config.get('mail.password'),
           },
+
+          // Sans ça, nodemailer utilise ses timeouts par défaut (plusieurs
+          // dizaines de secondes, voire plus) quand le SMTP est injoignable
+          // (port sortant bloqué par l'hébergeur, etc.) — un envoi d'email
+          // bloquait alors l'inscription entière (register() attend
+          // sendWelcomeEmail avant de répondre). 10s : on échoue vite,
+          // safeSend() logue et l'inscription continue normalement.
+          connectionTimeout: 10_000,
+          greetingTimeout: 10_000,
+          socketTimeout: 10_000,
         },
 
         defaults: {

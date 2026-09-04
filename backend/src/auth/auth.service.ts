@@ -86,8 +86,13 @@ export class AuthService {
       link: '/profile',
     });
 
-    await this.emailService.sendWelcomeEmail(user);
-    await this.sendVerificationEmail(user.id);
+    // Non bloquant : sendWelcomeEmail/sendVerificationEmail passent déjà
+    // par safeSend() (erreurs logguées, jamais rethrow), donc les attendre
+    // n'apporte rien ici — sauf faire poireauter toute l'inscription (et
+    // la connexion auto qui suit) le temps du délai SMTP en cas de souci
+    // réseau vers le serveur mail.
+    void this.emailService.sendWelcomeEmail(user);
+    void this.sendVerificationEmail(user.id);
 
     // Connexion automatique après inscription, comme pour login().
     const tokens = await this.tokenService.generateTokens(user);
