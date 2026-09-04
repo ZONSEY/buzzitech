@@ -32,6 +32,13 @@ async function main() {
   } finally {
     await prisma.$disconnect();
   }
+
+  // process.exit force le flush de stdout et tue le process immédiatement.
+  // Sans ça, si le pool pg sous-jacent laisse un handle ouvert après
+  // $disconnect(), le script ne termine jamais naturellement — Railway le
+  // tue au bout d'un moment côté préDeploy et les console.log ci-dessus,
+  // encore dans le buffer stdout, sont perdus (jamais vus dans les logs).
+  process.exit(0);
 }
 
 main().catch((error) => {

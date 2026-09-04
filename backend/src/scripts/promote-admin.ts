@@ -36,6 +36,9 @@ async function main() {
   } finally {
     await prisma.$disconnect();
   }
+
+  // Voir check-user.ts pour pourquoi ce process.exit est nécessaire.
+  process.exit(0);
 }
 
 main().catch((error) => {
